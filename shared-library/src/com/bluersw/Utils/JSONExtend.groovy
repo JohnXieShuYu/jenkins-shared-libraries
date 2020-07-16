@@ -19,7 +19,7 @@ class JSONExtend implements Serializable {
 	private VirtualChannel channel
 	private JSONObject jsonObject
 	private LinkedHashMap<String, String> globalVariable = new LinkedHashMap<>()
-	private LinkedHashMap<String, String> localVariableIndex = new LinkedHashMap<>()
+	private LinkedHashMap<String, String> localVariable = new LinkedHashMap<>()
 	private StringBuffer info = new StringBuffer()
 
 
@@ -59,7 +59,7 @@ class JSONExtend implements Serializable {
 	}
 
 	LinkedHashMap<String, String> getLocalVariable() {
-		return localVariableIndex
+		return localVariable
 	}
 
 	private void analyzeJSONObject(Object o, String xpath) {
@@ -75,7 +75,7 @@ class JSONExtend implements Serializable {
 				if(xpath.indexOf(NODE_NAME_GLOBAL_VARIABLE) != -1){
 					this.globalVariable.put(entry.key.toString(),entry.value.toString())
 				}else if(xpath.indexOf(NODE_NAME_LOCAL_VARIABLE) != -1){
-					this.localVariableIndex.put(xpath,entry.value.toString())
+					this.localVariable.put(xpath,entry.value.toString())
 				}
 			}
 			else {
