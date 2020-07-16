@@ -1,0 +1,58 @@
+{
+  "GlobalVariable": {
+    "gv1": "gv1-v",
+    "gv2": "gv2-v"
+  },
+  "node1": "node1-v",
+  "node2": {
+    "Variable": {
+      "node2-Variable-1": "nv2-1-v",
+      "node2-Variable-2": "nv2-2-v"
+    },
+    "node2-1": "node2-1-v",
+    "node2-2": "node2-2-v"
+  },
+  "node3": {
+    "Variable": {
+      "node3-Variable-1": "nv3-1-v",
+      "node3-Variable-2": "nv3-2-v"
+    },
+    "node3-1": "node3-1-v",
+    "node3-2": "node3-2-v"
+  },
+  "node4": [
+    {
+      "node4-1": "node4-1-v",
+      "node4-2": "node4-2-v"
+    },
+    {
+      "node4-3": "node4-3-v",
+      "node4-4": "node4-4-v"
+    }
+  ],
+  "node5": {
+    "node5-1": "node5-1",
+    "Variable": {
+      "node5-Variable-1": "nv5-1-v",
+      "node5-Variable-2": "nv5-2-v"
+    },
+    "node5-2": {
+      "node5-2-1": "node5-2-1-v",
+      "Variable": {
+        "node5-2-Variable-1": "nv5-2-1-v",
+        "node5-2-Variable-2": "nv5-2-2-v"
+      },
+      "node5-2-2": "node5-2-2-v",
+      "node5-2-3": [
+        {
+          "node5-2-3-1": "node5-2-3-1-v",
+          "node5-2-3-2": "node5-2-3-2-v"
+        },
+        {
+          "node5-2-3-3": "node5-2-3-3-v",
+          "node5-2-3-4": "node5-2-3-4-v"
+        }
+      ]
+    }
+  }
+}

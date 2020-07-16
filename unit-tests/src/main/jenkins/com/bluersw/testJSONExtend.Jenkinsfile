@@ -1,0 +1,11 @@
+@Library('shared-library')
+import com.bluersw.Utils.JSONExtend
+println('--------------------json_init---------------------------------')
+JSONExtend json_init = new JSONExtend(null,'./src/main/jenkins/com/bluersw/test-res/init.json')
+println('init:')
+print(json_init.getInfo())
+println('--------------------json_variable---------------------------------')
+JSONExtend json_variable = new JSONExtend(null,'./src/main/jenkins/com/bluersw/test-res/variable.json')
+println('init:')
+println(json_variable.getGlobalVariable())
+println(json_variable.getLocalVariable())

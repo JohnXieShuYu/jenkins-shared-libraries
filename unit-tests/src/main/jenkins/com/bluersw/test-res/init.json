@@ -1,0 +1,38 @@
+{
+  "node1": "node1-v",
+  "node2": {
+    "node2-1": "node2-1-v",
+    "node2-2": "node2-2-v"
+  },
+  "node3": {
+    "node3-1": "node3-1-v",
+    "node3-2": "node3-2-v"
+  },
+  "node4": [
+    {
+      "node4-1": "node4-1-v",
+      "node4-2": "node4-2-v"
+    },
+    {
+      "node4-3": "node4-3-v",
+      "node4-4": "node4-4-v"
+    }
+  ],
+  "node5": {
+    "node5-1": "node5-1",
+    "node5-2": {
+      "node5-2-1": "node5-2-1-v",
+      "node5-2-2": "node5-2-2-v",
+      "node5-2-3": [
+        {
+          "node5-2-3-1": "node5-2-3-1-v",
+          "node5-2-3-2": "node5-2-3-2-v"
+        },
+        {
+          "node5-2-3-3": "node5-2-3-3-v",
+          "node5-2-3-4": "node5-2-3-4-v"
+        }
+      ]
+    }
+  }
+}
