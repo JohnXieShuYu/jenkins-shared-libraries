@@ -1,7 +1,10 @@
 {
   "GlobalVariable": {
     "gv1": "gv1-v",
-    "gv2": "gv2-v"
+    "gv2": "gv2-v",
+    "gv3": "${gv1}",
+    "gv4": "${gv5}",
+    "gv5": "${gv3}-${gv1}"
   },
   "node1": "node1-v",
   "node2": {
@@ -34,13 +37,17 @@
     "node5-1": "node5-1",
     "Variable": {
       "node5-Variable-1": "nv5-1-v",
-      "node5-Variable-2": "nv5-2-v"
+      "node5-Variable-2": "nv5-2-v",
+      "a": "va"
     },
     "node5-2": {
       "node5-2-1": "node5-2-1-v",
       "Variable": {
-        "node5-2-Variable-1": "nv5-2-1-v",
-        "node5-2-Variable-2": "nv5-2-2-v"
+        "a": "va-va",
+        "node5-2-Variable-1": "nv5-2-1-v--${a}--${gv1}",
+        "node5-2-Variable-2": "nv5-2-2-v--${node5-Variable-1}--${node5-Variable-2}",
+        "node5-2-Variable-3": "vvvvv${node5-Variable-2}--${gv3}",
+        "node5-2-Variable-4": "44444${gv5}"
       },
       "node5-2-2": "node5-2-2-v",
       "node5-2-3": [
@@ -52,7 +59,8 @@
           "node5-2-3-3": "node5-2-3-3-v",
           "node5-2-3-4": "node5-2-3-4-v"
         }
-      ]
+      ],
+      "node5-2-4": "vvv${node5-2-Variable-1}"
     }
   }
 }

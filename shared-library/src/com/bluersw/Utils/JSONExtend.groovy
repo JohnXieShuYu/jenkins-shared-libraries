@@ -1,5 +1,8 @@
 package com.bluersw.Utils
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel
 import hudson.remoting.Channel
@@ -13,13 +16,15 @@ class JSONExtend implements Serializable {
 	private static final String FILE_SEPARATOR = System.getProperty("file.separator")
 	private static final String NODE_NAME_GLOBAL_VARIABLE = "GlobalVariable"
 	private static final String NODE_NAME_LOCAL_VARIABLE = "Variable"
+	private static final Pattern FIND_VARIABLE_PATTERN = Pattern.compile('\\$\\{(?<key>.*?)}')
+	private static final Pattern JUDGE_VARIABLE_PATTERN = Pattern.compile('\\$\\{(.*?)}')
 	private FilePath filePath
 	private String path
 	private String text
 	private VirtualChannel channel
 	private JSONObject jsonObject
 	private LinkedHashMap<String, String> globalVariable = new LinkedHashMap<>()
-	private LinkedHashMap<String, String> localVariable = new LinkedHashMap<>()
+	private LinkedHashMap<String, LinkedHashMap<String, String>> localVariable = new LinkedHashMap<>()
 	private StringBuffer info = new StringBuffer()
 
 
@@ -54,29 +59,181 @@ class JSONExtend implements Serializable {
 		return info.toString()
 	}
 
+	void addInfo(String... args) {
+		for (int i = 0; i < args.length; i++) {
+			info.append(args[i])
+			if (i != args.length - 1) {
+				info.append(':')
+			}
+		}
+		info.append('\r\n')
+	}
+
 	LinkedHashMap<String, String> getGlobalVariable() {
 		return globalVariable
 	}
 
-	LinkedHashMap<String, String> getLocalVariable() {
+	LinkedHashMap<String, LinkedHashMap<String, String>> getLocalVariable() {
 		return localVariable
 	}
 
+	/**
+	 * 设置局部变量名称和值内容
+	 * @param xpath 变量的路径
+	 * @param varName 变量名称
+	 * @param value 变量值
+	 */
+	private void setLocalVariable(String xpath, String varName, String value) {
+		//得到变量的作用域
+		String scope = xpath.substring(0, xpath.indexOf(NODE_NAME_LOCAL_VARIABLE) - 1)
+		if (!localVariable.containsKey(scope)) {
+			localVariable.put(scope, new LinkedHashMap<>())
+		}
+		//如果变量内含其他变量的引用
+		if (JUDGE_VARIABLE_PATTERN.matcher(value).find()) {
+			//分解作用域层次
+			List<String> scopeList = splitScopeLevel(xpath)
+
+			//循环作用域尝试为变量赋值
+			for (String scopeKey in scopeList) {
+				if (localVariable.containsKey(scopeKey)) {
+					value = transformVariableValue(varName, value, localVariable[scopeKey])
+					//判断是否存在需要赋值的变量，如果没有就跳出循环，加快运行速度
+					if (!JUDGE_VARIABLE_PATTERN.matcher(value).find()) {
+						break
+					}
+				}
+			}
+
+			//遍历全局变量尝试赋值
+			if (JUDGE_VARIABLE_PATTERN.matcher(value).find()) {
+				value = transformVariableValue(varName, value, globalVariable)
+			}
+		}
+		//存储局部变量和变量值
+		localVariable[scope].put(varName, value)
+	}
+
+	/**
+	 * 设置全局变量
+	 * @param varName 变量名
+	 * @param value 变量值
+	 */
+	private void setGlobalVariable(String varName, String value) {
+		globalVariable.put(varName, transformVariableValue(varName, value, globalVariable))
+	}
+
+	/**
+	 * 转换变量的值，如果变量值内含其他变量引用则进行赋值，否则返回变量值的原始值，如果找不到引用变量的值也返回原始内容
+	 * @param varName 变量名称
+	 * @param value 变量值内容（可能包含其他变量名称）
+	 * @param range 检索变量值的集合
+	 * @return 变量值内容中包含其他变量名称进行赋值替换后返回
+	 */
+	private String transformVariableValue(String varName, String value, LinkedHashMap<String, String> range) {
+		//判断自引用情况
+		if (value.indexOf("\${${varName}}") != -1) {
+			throw new IllegalArgumentException("变量定义的值内容中包含自身变量的引用，这会引起死循环赋值。")
+		}
+
+		//对引用的变量名称进行分组匹配
+		Matcher varMatcher = FIND_VARIABLE_PATTERN.matcher(value)
+
+		while (varMatcher.find()) {
+			String key = varMatcher.group('key')
+			if (range.containsKey(key)) {
+				//将变量名称替换为变量值内容
+				value = value.replace("\${${key}}", range[key])
+			}
+		}
+		return value
+	}
+
+	/**
+	 * 拆分作用域层次
+	 * @param xpath 节点路径
+	 * @return 作用域层次集合（由近及远）
+	 */
+	private List<String> splitScopeLevel(String xpath){
+		//分解作用域层次
+		String scope = xpath
+		List<String> scopeList = new ArrayList<>()
+		while (scope.indexOf('/') != -1) {
+			scopeList.add(scope)
+			scope = scope.substring(0, scope.lastIndexOf('/'))
+		}
+
+		return scopeList
+	}
+
+	/**
+	 * 转换节点的值，节点值可能包含变量引用，如能找到变量的值则进行替换赋值，否则原样返回
+	 * @param xpath 节点路径
+	 * @param nodeValue 节点值（可能包含变量引用）
+	 * @return 节点值如果含变量引用，将变量赋值后返回
+	 */
+	private String transformNodeValue(String xpath, String nodeValue){
+		if(JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()){
+			//分解作用域层次
+			List<String> scopeList = splitScopeLevel(xpath)
+			//对引用的变量名称进行分组匹配
+			Matcher varMatcher = FIND_VARIABLE_PATTERN.matcher(nodeValue)
+
+			while (varMatcher.find()) {
+				String key = varMatcher.group('key')
+				//循环作用域尝试为变量赋值
+				for (String scopeKey in scopeList) {
+					if (localVariable.containsKey(scopeKey)) {
+						if(localVariable[scopeKey].containsKey(key)){
+							nodeValue = nodeValue.replace("\${${key}}", localVariable[scopeKey][key])
+						}
+						//判断是否存在需要赋值的变量，如果没有就跳出循环，加快运行速度
+						if (!JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()) {
+							break
+						}
+					}
+				}
+
+				//遍历全局变量尝试赋值
+				if (JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()) {
+					if(globalVariable.containsKey(key))
+						nodeValue = nodeValue.replace("\${${key}}", globalVariable[key])
+				}
+			}
+		}
+
+		return nodeValue
+	}
+
+
+	/**
+	 * 对JSON文件进行分析处理
+	 * @param o JSON文档节点
+	 * @param xpath 文档内节点路径，以"/"分割
+	 */
 	private void analyzeJSONObject(Object o, String xpath) {
 		Iterator<String> entrys = null;
+		//根节点和[]内的元素都是JSONObject类型
 		if (o instanceof JSONObject) {
 			entrys = ((JSONObject) o).entrySet().iterator()
 		}
 		else if (o instanceof Map.Entry) {
 			Map.Entry entry = (Map.Entry) o
-			xpath = xpath + '/'  + entry.key.toString()
+			//记录节点路径，节点之间用"/"分割
+			xpath = xpath + '/' + entry.key.toString()
 			if (entry.value instanceof String) {
-				this.info.append(xpath + ':' + entry.value + '\r\n')
-				if(xpath.indexOf(NODE_NAME_GLOBAL_VARIABLE) != -1){
-					this.globalVariable.put(entry.key.toString(),entry.value.toString())
-				}else if(xpath.indexOf(NODE_NAME_LOCAL_VARIABLE) != -1){
-					this.localVariable.put(xpath,entry.value.toString())
+				//如果是全局变量节点
+				if (xpath.indexOf(NODE_NAME_GLOBAL_VARIABLE) != -1) {
+					setGlobalVariable(entry.key.toString(), entry.value.toString())
+				}//如果是局部变量节点
+				else if (xpath.indexOf(NODE_NAME_LOCAL_VARIABLE) != -1) {
+					setLocalVariable(xpath, entry.key.toString(), entry.value.toString())
 				}
+
+				entry.value = transformNodeValue(xpath,entry.value.toString())
+
+				//添加日志
+				addInfo(xpath, entry.value.toString())
 			}
 			else {
 				entrys = entry.value.iterator()
@@ -84,6 +241,7 @@ class JSONExtend implements Serializable {
 		}
 		if (entrys != null) {
 			while (entrys.hasNext()) {
+				//递归遍历
 				analyzeJSONObject(entrys.next(), xpath)
 			}
 		}

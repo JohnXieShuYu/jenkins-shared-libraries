@@ -9,3 +9,4 @@ JSONExtend json_variable = new JSONExtend(null,'./src/main/jenkins/com/bluersw/t
 println('init:')
 println(json_variable.getGlobalVariable())
 println(json_variable.getLocalVariable())
+print(json_variable.getInfo())
