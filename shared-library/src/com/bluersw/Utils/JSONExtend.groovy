@@ -9,7 +9,7 @@ import hudson.remoting.Channel
 import net.sf.json.JSONObject
 
 /**
- * 处理Json文档，扩展了变量的概念
+ * 处理Json文档，扩展了变量的概念，文档内可以定义全局变量和局部变量，节点的值可引用变量进行赋值。
  */
 class JSONExtend implements Serializable {
 
@@ -229,7 +229,7 @@ class JSONExtend implements Serializable {
 				else if (xpath.indexOf(NODE_NAME_LOCAL_VARIABLE) != -1) {
 					setLocalVariable(xpath, entry.key.toString(), entry.value.toString())
 				}
-
+				//如果节点的值含变量引用，赋值后返回新的节点值内容
 				entry.value = transformNodeValue(xpath,entry.value.toString())
 
 				//添加日志
