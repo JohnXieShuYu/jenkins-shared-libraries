@@ -2,8 +2,11 @@ package com.bluersw.Utils
 
 import java.nio.charset.Charset
 
+import com.cloudbees.groovy.cps.NonCPS
+
 class HttpRequest {
-	static String get(String url){
+
+	static String getResponse(String url){
 		HttpURLConnection connection = null
 		BufferedReader bufferedReader = null
 		StringBuilder builder = new StringBuilder()
