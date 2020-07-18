@@ -6,6 +6,7 @@ import com.cloudbees.groovy.cps.NonCPS
 
 class HttpRequest {
 
+	@NonCPS
 	static String getResponse(String url){
 		HttpURLConnection connection = null
 		BufferedReader bufferedReader = null

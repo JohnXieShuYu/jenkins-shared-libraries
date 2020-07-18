@@ -3,6 +3,7 @@ package com.bluersw.Utils
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import com.cloudbees.groovy.cps.NonCPS
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel
 import hudson.remoting.Channel
@@ -11,7 +12,7 @@ import net.sf.json.JSONObject
 /**
  * 处理Json文档，扩展了变量的概念，文档内可以定义全局变量和局部变量，节点的值可引用变量进行赋值。
  */
-class JSONExtend implements Serializable {
+class JSONExtend {
 
 	private static final String FILE_SEPARATOR = System.getProperty("file.separator")
 	private static final String NODE_NAME_GLOBAL_VARIABLE = "GlobalVariable"
@@ -49,6 +50,7 @@ class JSONExtend implements Serializable {
 	JSONExtend(String text) {
 		this.text = text
 		this.jsonObject = JSONObject.fromObject(this.text)
+		analyzeJSONObject(this.jsonObject, '')
 	}
 
 	JSONObject getJsonObject() {
@@ -59,6 +61,7 @@ class JSONExtend implements Serializable {
 		return info.toString()
 	}
 
+	@NonCPS
 	void addInfo(String... args) {
 		for (int i = 0; i < args.length; i++) {
 			info.append(args[i])
@@ -83,6 +86,7 @@ class JSONExtend implements Serializable {
 	 * @param varName 变量名称
 	 * @param value 变量值
 	 */
+	@NonCPS
 	private void setLocalVariable(String xpath, String varName, String value) {
 		//得到变量的作用域
 		String scope = xpath.substring(0, xpath.indexOf(NODE_NAME_LOCAL_VARIABLE) - 1)
@@ -119,6 +123,7 @@ class JSONExtend implements Serializable {
 	 * @param varName 变量名
 	 * @param value 变量值
 	 */
+	@NonCPS
 	private void setGlobalVariable(String varName, String value) {
 		globalVariable.put(varName, transformVariableValue(varName, value, globalVariable))
 	}
@@ -130,6 +135,7 @@ class JSONExtend implements Serializable {
 	 * @param range 检索变量值的集合
 	 * @return 变量值内容中包含其他变量名称进行赋值替换后返回
 	 */
+	@NonCPS
 	private String transformVariableValue(String varName, String value, LinkedHashMap<String, String> range) {
 		//判断自引用情况
 		if (value.indexOf("\${${varName}}") != -1) {
@@ -154,6 +160,7 @@ class JSONExtend implements Serializable {
 	 * @param xpath 节点路径
 	 * @return 作用域层次集合（由近及远）
 	 */
+	@NonCPS
 	private List<String> splitScopeLevel(String xpath){
 		//分解作用域层次
 		String scope = xpath
@@ -172,6 +179,7 @@ class JSONExtend implements Serializable {
 	 * @param nodeValue 节点值（可能包含变量引用）
 	 * @return 节点值如果含变量引用，将变量赋值后返回
 	 */
+	@NonCPS
 	private String transformNodeValue(String xpath, String nodeValue){
 		if(JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()){
 			//分解作用域层次
@@ -211,6 +219,7 @@ class JSONExtend implements Serializable {
 	 * @param o JSON文档节点
 	 * @param xpath 文档内节点路径，以"/"分割
 	 */
+	@NonCPS
 	private void analyzeJSONObject(Object o, String xpath) {
 		Iterator<String> entrys = null;
 		//根节点和[]内的元素都是JSONObject类型
