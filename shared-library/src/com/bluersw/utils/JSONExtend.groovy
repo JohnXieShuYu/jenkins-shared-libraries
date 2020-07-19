@@ -1,4 +1,4 @@
-package com.bluersw.Utils
+package com.bluersw.utils
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -97,7 +97,6 @@ class JSONExtend {
 		if (JUDGE_VARIABLE_PATTERN.matcher(value).find()) {
 			//分解作用域层次
 			List<String> scopeList = splitScopeLevel(xpath)
-
 			//循环作用域尝试为变量赋值
 			for (String scopeKey in scopeList) {
 				if (localVariable.containsKey(scopeKey)) {
@@ -108,7 +107,6 @@ class JSONExtend {
 					}
 				}
 			}
-
 			//遍历全局变量尝试赋值
 			if (JUDGE_VARIABLE_PATTERN.matcher(value).find()) {
 				value = transformVariableValue(varName, value, globalVariable)
@@ -141,7 +139,6 @@ class JSONExtend {
 		if (value.indexOf("\${${varName}}") != -1) {
 			throw new IllegalArgumentException("变量定义的值内容中包含自身变量的引用，这会引起死循环赋值。")
 		}
-
 		//对引用的变量名称进行分组匹配
 		Matcher varMatcher = FIND_VARIABLE_PATTERN.matcher(value)
 
@@ -169,7 +166,6 @@ class JSONExtend {
 			scopeList.add(scope)
 			scope = scope.substring(0, scope.lastIndexOf('/'))
 		}
-
 		return scopeList
 	}
 
@@ -186,7 +182,6 @@ class JSONExtend {
 			List<String> scopeList = splitScopeLevel(xpath)
 			//对引用的变量名称进行分组匹配
 			Matcher varMatcher = FIND_VARIABLE_PATTERN.matcher(nodeValue)
-
 			while (varMatcher.find()) {
 				String key = varMatcher.group('key')
 				//循环作用域尝试为变量赋值
@@ -201,7 +196,6 @@ class JSONExtend {
 						}
 					}
 				}
-
 				//遍历全局变量尝试赋值
 				if (JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()) {
 					if(globalVariable.containsKey(key))
@@ -209,7 +203,6 @@ class JSONExtend {
 				}
 			}
 		}
-
 		return nodeValue
 	}
 

@@ -1,4 +1,4 @@
-package com.bluersw.Utils
+package com.bluersw.utils
 
 import java.nio.charset.Charset
 

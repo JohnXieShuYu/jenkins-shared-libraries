@@ -1,5 +1,5 @@
 @Library('shared-library')
-import com.bluersw.Utils.JSONExtend
+import com.bluersw.utils.JSONExtend
 println('--------------------json_init---------------------------------')
 JSONExtend json_init = new JSONExtend(null,'./src/main/jenkins/com/bluersw/test-res/init.json')
 println('init:')

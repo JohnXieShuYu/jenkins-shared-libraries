@@ -1,5 +1,5 @@
 @Library('shared-library')
-import com.bluersw.Utils.HttpRequest
+import com.bluersw.utils.HttpRequest
 
 def response = HttpRequest.getResponse('https://www.baidu.com')
 
