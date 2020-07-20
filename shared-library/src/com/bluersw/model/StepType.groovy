@@ -7,8 +7,10 @@ package com.bluersw.model
 enum StepType {
 	//全局变量
 	GLOBAL_VARIABLE,
-	//通过SH或BAT执行的步骤
-	COMMAND,
+	//通过SH或BAT执行的判定执行状态，返回0代表成功
+	COMMAND_STATUS,
+	//通过SH或BAT执行的获得标准输出结果
+	COMMAND_STDOUT,
 	//绑定Jenkins构建参数控件的值
 	BUILD_PARAMETER,
 	//Jenkins junit 插件执行步骤
