@@ -22,7 +22,7 @@ class CommandQueue extends AbstractStep {
 	}
 
 	@Override
-	StepResult runStep(Closure display) {
+	StepResult runStep() {
 		return null
 	}
 }

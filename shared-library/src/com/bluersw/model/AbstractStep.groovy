@@ -1,9 +1,10 @@
 package com.bluersw.model
 
+import com.bluersw.model.PipelineUtility
 import com.bluersw.model.StepResult
 import com.bluersw.model.StepType
 
-public abstract class AbstractStep {
+abstract class AbstractStep {
 
 	protected String name
 	protected String xpath
@@ -11,15 +12,18 @@ public abstract class AbstractStep {
 	protected StringBuilder info = new StringBuilder()
 	protected StringBuilder warning = new StringBuilder()
 	protected LinkedHashMap<String, String> stepProperty = new LinkedHashMap<>()
+	protected final String NEW_LINE = '\r\n'
+	protected PipelineUtility pipelineUtility
 
-	AbstractStep(String name, String xpath, StepType stepType) {
+	AbstractStep(String name, String xpath, StepType stepType, PipelineUtility pipelineUtility) {
 		this.name = name
 		this.xpath = xpath
 		this.stepType = stepType
+		this.pipelineUtility = pipelineUtility
 	}
 
 	protected void addInfo(String infoLog) {
-		info.append(infoLog + '\r\n')
+		info.append(infoLog + NEW_LINE)
 	}
 
 	protected String getInfo() {
@@ -27,7 +31,7 @@ public abstract class AbstractStep {
 	}
 
 	protected void addWarning(String warnLog) {
-		info.append(warnLog + '\r\n')
+		info.append(warnLog + NEW_LINE)
 	}
 
 	protected String getWarning() {
@@ -47,12 +51,5 @@ public abstract class AbstractStep {
 		}
 	}
 
-	/**
-	 * 执行步骤，并打印执行信息
-	 * <pre>示例：StepResult result
-	 * result = AbstractStep.runStep { displayInfo -> Println(displayInfo) } </pre>
-	 * @param display 处理显示信息的闭包
-	 * @return 执行结果
-	 */
-	abstract StepResult runStep(Closure display)
+	abstract StepResult runStep()
 }
