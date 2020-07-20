@@ -1,8 +1,8 @@
 package com.bluersw.model
 
-import com.bluersw.model.PipelineUtility
 import com.bluersw.model.StepResult
 import com.bluersw.model.StepType
+import com.bluersw.model.Utility
 
 abstract class AbstractStep {
 
@@ -13,13 +13,13 @@ abstract class AbstractStep {
 	protected StringBuilder warning = new StringBuilder()
 	protected LinkedHashMap<String, String> stepProperty = new LinkedHashMap<>()
 	protected final String NEW_LINE = '\r\n'
-	protected PipelineUtility pipelineUtility
+	protected Utility utility
 
-	AbstractStep(String name, String xpath, StepType stepType, PipelineUtility pipelineUtility) {
+	AbstractStep(String name, String xpath, StepType stepType, Utility utility) {
 		this.name = name
 		this.xpath = xpath
 		this.stepType = stepType
-		this.pipelineUtility = pipelineUtility
+		this.utility = utility
 	}
 
 	protected void addInfo(String infoLog) {

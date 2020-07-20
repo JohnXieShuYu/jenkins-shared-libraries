@@ -3,13 +3,14 @@ package com.bluersw.model
 import com.bluersw.model.AbstractStep
 import com.bluersw.model.StepResult
 import com.bluersw.model.StepType
+import com.bluersw.model.Utility
 
 class CommandQueue extends AbstractStep {
 
 	private LinkedHashMap<String, String> commandQueue = new LinkedHashMap<>()
 
-	CommandQueue(String name, String xpath) {
-		super(name, xpath, StepType.COMMAND)
+	CommandQueue(String name, String xpath, Utility utility) {
+		super(name, xpath, StepType.COMMAND,utility)
 	}
 
 	void append(String name, String command) {

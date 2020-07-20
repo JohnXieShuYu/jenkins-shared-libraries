@@ -2,7 +2,7 @@ package com.bluersw.model
 
 import net.sf.json.JSONObject
 
-interface PipelineUtility {
+interface Utility {
 
 	boolean isUnix()
 
