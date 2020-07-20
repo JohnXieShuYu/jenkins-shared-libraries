@@ -1,4 +1,4 @@
 package com.bluersw
 
-class BuildFactory {
+class StepWrapper {
 }

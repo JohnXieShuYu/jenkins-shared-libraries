@@ -1,6 +1,6 @@
 package com.bluersw.model
 
-import com.bluersw.model.StepResult
+import com.bluersw.model.Result
 import com.bluersw.model.StepType
 import com.bluersw.model.Utility
 
@@ -51,5 +51,5 @@ abstract class AbstractStep {
 		}
 	}
 
-	abstract StepResult runStep()
+	abstract Result<String> run()
 }
