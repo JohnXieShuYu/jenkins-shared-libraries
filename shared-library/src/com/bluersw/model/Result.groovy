@@ -56,10 +56,10 @@ class Result<T> {
 	}
 
 	String getInfo() {
-		return String.format("%s info:%s",stepName, info)
+		return info
 	}
 
 	String getWarning() {
-		return String.format("%s warning:%s",stepName, warning)
+		return warning
 	}
 }

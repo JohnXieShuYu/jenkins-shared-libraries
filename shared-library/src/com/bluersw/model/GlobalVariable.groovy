@@ -9,14 +9,13 @@ class GlobalVariable extends AbstractStep {
 
 	private static final String STEP_NAME = "GlobalVariable"
 
-	GlobalVariable(String xpath, Utility utility) {
-		super(STEP_NAME, xpath, StepType.GLOBAL_VARIABLE, utility)
+	GlobalVariable(String xpath, Utility utility,boolean showLog) {
+		super(STEP_NAME, xpath, StepType.GLOBAL_VARIABLE, utility, showLog)
 	}
 
 	@Override
-	Result<String> run() {
+	void run() {
 		this.stepProperty.each { key, value -> utility.println("[${key}:${value}]")
 		}
-		return new Result<String>(this.name, true, this.getInfo(), this.getWarning())
 	}
 }

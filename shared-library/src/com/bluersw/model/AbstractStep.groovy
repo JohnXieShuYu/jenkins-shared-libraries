@@ -14,12 +14,17 @@ abstract class AbstractStep {
 	protected LinkedHashMap<String, String> stepProperty = new LinkedHashMap<>()
 	protected final String NEW_LINE = '\r\n'
 	protected Utility utility
+	protected boolean showLog
 
-	AbstractStep(String name, String xpath, StepType stepType, Utility utility) {
+	AbstractStep(String name, String xpath, StepType stepType, Utility utility, boolean showLog) {
 		this.name = name
 		this.xpath = xpath
 		this.stepType = stepType
 		this.utility = utility
+		this.showLog = showLog
+
+		this.info.append("${name}节点info："+NEW_LINE)
+		this.warning.append("${name}节点warning："+NEW_LINE)
 	}
 
 	protected void addInfo(String infoLog) {
@@ -42,14 +47,12 @@ abstract class AbstractStep {
 		return stepProperty.getOrDefault(propertyName, '')
 	}
 
-	void setStepProperty(String name, String value) {
-		if (!stepProperty.containsKey(name)) {
-			stepProperty.put(name, value)
+	void setStepProperty(String propertyName, String value) {
+		if (stepProperty.containsKey(propertyName)) {
+			addWarning("名称为：${propertyName}的属性已经存在，该属性的内容被覆盖为：${value}")
 		}
-		else {
-			throw new IllegalArgumentException("添加属性时${name}已经存在，不能添加同名属性。")
-		}
+		stepProperty.put(propertyName, value)
 	}
 
-	abstract Result<String> run()
+	abstract void run()
 }

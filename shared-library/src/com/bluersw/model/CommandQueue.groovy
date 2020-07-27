@@ -12,79 +12,61 @@ class CommandQueue extends AbstractStep {
 	private final String COMMAND_PREFIX = '#!/bin/bash'
 	private LinkedHashMap<String, Command> commandQueue = new LinkedHashMap<>()
 
-	CommandQueue(String name, String xpath, Utility utility) {
-		super(name, xpath, StepType.COMMAND, utility)
+	CommandQueue(String name, String xpath, StepType stepType, Utility utility, boolean showLog) {
+		super(name, xpath, stepType, utility, showLog)
 	}
 
 	void append(String name, Command command) {
-		if (!commandQueue.containsKey(name)) {
-			commandQueue.put(name, command)
-		}
-		else {
+		if (commandQueue.containsKey(name)) {
 			addWarning("名称为：${name}的命令已经存在，该命令被覆盖为：${command}")
 		}
+		commandQueue.put(name, command)
 	}
 
 	@Override
-	Result<String> run() {
-		return null
+	void run() {
+		for (Map.Entry<String, Command> entry in commandQueue.entrySet()) {
+			if (stepType == StepType.COMMAND_STATUS) {
+				runStatus(entry.value)
+
+			}else if(stepType == StepType.COMMAND_STDOUT){
+				runStdout(entry.value)
+			}
+		}
 	}
 
 	private String supplementPrefix(String script) {
-		if (utility.isUnix()) {
-			if (!script.startsWith(COMMAND_PREFIX)) {
-				script = UNIX_COMMAND_PREFIX + script
-			}
+		if (!script.startsWith(COMMAND_PREFIX)) {
+			script = UNIX_COMMAND_PREFIX + script
 		}
 		return script
 	}
 
-	private Result<String> runStatus(Command command) {
-		Result<String> result = new Result<String>()
-		String script = supplementPrefix(command.getCommand())
-		def status = -1
-		try {
-			if (utility.isUnix()) {
-				status = utility.sh(script, true, false)
-			}
-			else {
-				status = utility.bat(script, true, false)
-			}
-			result.setIsSuccess(status == 0)
-			result.setValue(status as String)
-			result.setInfo("执行：${command}，返回状态码：${status}")
-			return result
+	private void runStatus(Command command) {
+		String script = command.getCommand()
+		def status
+		if (utility.isUnix()) {
+			status = utility.sh(supplementPrefix(script), true, false)
 		}
-		catch (Exception ex) {
-			result.setIsSuccess(false)
-			result.setValue(status as String)
-			result.setError("执行脚本：${command}，发生异常：${ex.toString()} \n ${ex.getMessage()}")
-			return result
+		else {
+			status = utility.bat(script, true, false)
+		}
+		if(status == 0){
+			utility.println("执行：${command}成功！")
+		}else{
+			throw new Exception("执行：${command}失败！返回状态码：${status}。")
 		}
 	}
 
-	private Result<String> runStdout(Command command) {
-		Result<String> result = new Result<String>()
-		String script = supplementPrefix(command.getCommand())
-		def stdout = ""
-		try {
-			if (utility.isUnix()) {
-				stdout = utility.sh(script, false, true)
-			}
-			else {
-				stdout = utility.bat(script, false, true)
-			}
-
-			result.setIsSuccess(true)
-			result.setValue(stdout as String)
-			result.setInfo("执行：${script}，输出内容：${stdout}")
-			return result
+	private void runStdout(Command command) {
+		String script = command.getCommand()
+		def stdout
+		if (utility.isUnix()) {
+			stdout = utility.sh(supplementPrefix(script), false, true)
 		}
-		catch (Exception ex) {
-			result.setIsSuccess(false)
-			result.setValue(stdout as String)
-			result.setError("执行脚本：${command}，发生异常：${ex.toString()} \n ${ex.getMessage()}")
-			return result
+		else {
+			stdout = utility.bat(script, false, true)
 		}
+		utility.println("输出内容：${stdout}")
 	}
 }
