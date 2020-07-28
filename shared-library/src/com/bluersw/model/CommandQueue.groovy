@@ -2,6 +2,8 @@ package com.bluersw.model
 
 import com.bluersw.model.AbstractStep
 import com.bluersw.model.Command
+import com.bluersw.model.DisplayInfo
+import com.bluersw.model.LogType
 import com.bluersw.model.Result
 import com.bluersw.model.StepType
 import com.bluersw.model.Utility
@@ -12,13 +14,13 @@ class CommandQueue extends AbstractStep {
 	private final String COMMAND_PREFIX = '#!/bin/bash'
 	private LinkedHashMap<String, Command> commandQueue = new LinkedHashMap<>()
 
-	CommandQueue(String name, String xpath, StepType stepType, Utility utility, boolean showLog) {
-		super(name, xpath, stepType, utility, showLog)
+	CommandQueue(String name, String xpath, StepType stepType, Utility utility, DisplayInfo displayInfo) {
+		super(name, xpath, stepType, utility, displayInfo)
 	}
 
 	void append(String name, Command command) {
 		if (commandQueue.containsKey(name)) {
-			addWarning("名称为：${name}的命令已经存在，该命令被覆盖为：${command}")
+			this.println(LogType.WARNING,"名称为：${name}的命令已经存在，该命令被覆盖为：${command}")
 		}
 		commandQueue.put(name, command)
 	}
@@ -52,7 +54,7 @@ class CommandQueue extends AbstractStep {
 			status = utility.bat(script, true, false)
 		}
 		if(status == 0){
-			utility.println("执行：${command}成功！")
+			this.println(LogType.INFO,"执行：${command}成功！")
 		}else{
 			throw new Exception("执行：${command}失败！返回状态码：${status}。")
 		}
@@ -67,6 +69,6 @@ class CommandQueue extends AbstractStep {
 		else {
 			stdout = utility.bat(script, false, true)
 		}
-		utility.println("输出内容：${stdout}")
+		this.println(LogType.INFO,"输出内容：${stdout}")
 	}
 }
