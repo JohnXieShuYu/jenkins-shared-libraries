@@ -1,0 +1,16 @@
+{
+  "GlobalVariable": {
+    "GV1": "1",
+    "GV2": "2",
+    "ProjectRoot": ".",
+    "Email-TO": "XXX",
+    "Email-CC": "YYY"
+  },
+  "执行命令": {
+    "type": "COMMAND_STDOUT",
+    "script": {
+      "命令1": "ls",
+      "命令2": "date"
+    }
+  }
+}

@@ -17,4 +17,6 @@ interface Utility {
 	Map readProperties(String file)
 
 	JSONObject readJSON(String file)
+
+	void println(String info)
 }

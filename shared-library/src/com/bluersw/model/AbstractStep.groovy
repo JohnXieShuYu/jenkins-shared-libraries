@@ -9,23 +9,21 @@ import com.bluersw.model.Utility
 abstract class AbstractStep {
 
 	protected String name
-	protected String xpath
 	protected StepType stepType
-	protected LinkedHashMap<String, String> stepProperty = new LinkedHashMap<>()
+	protected HashMap<String, String> stepProperty = new HashMap<>()
 	protected Utility utility
 	protected DisplayInfo displayInfo
 
-	AbstractStep(String name, String xpath, StepType stepType, Utility utility, DisplayInfo displayInfo) {
+	AbstractStep(String name, StepType stepType, Utility utility, DisplayInfo displayInfo) {
 		this.name = name
-		this.xpath = xpath
 		this.stepType = stepType
 		this.utility = utility
 		this.displayInfo = displayInfo
 	}
 
-	protected void println(LogType logType,String content){
-		if(this.displayInfo){
-			this.displayInfo.println(logType,content)
+	protected void println(LogType logType, String content) {
+		if (this.displayInfo) {
+			this.displayInfo.println(logType, content)
 		}
 	}
 
