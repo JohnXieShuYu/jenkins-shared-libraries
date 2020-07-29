@@ -6,11 +6,13 @@
     "Email-TO": "XXX",
     "Email-CC": "YYY"
   },
-  "执行命令": {
-    "type": "COMMAND_STDOUT",
-    "script": {
-      "命令1": "ls",
-      "命令2": "date"
+  "Step1": {
+    "执行命令": {
+      "type": "COMMAND_STDOUT",
+      "script": {
+        "命令1": "ls",
+        "命令2": "date"
+      }
     }
   }
 }

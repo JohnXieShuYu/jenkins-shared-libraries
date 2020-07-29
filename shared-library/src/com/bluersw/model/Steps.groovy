@@ -1,4 +1,4 @@
-package com.bluersw
+package com.bluersw.model
 
 import com.bluersw.model.AbstractStep
 import com.bluersw.model.DisplayInfo
@@ -9,7 +9,7 @@ import com.cloudbees.groovy.cps.NonCPS
 class Steps {
 	private String name
 	private HashMap<String, String> stepsProperty = new HashMap<>()
-	private LinkedHashMap<String, AbstractStep> steps = new LinkedList<>()
+	private Queue<AbstractStep> stepQueue = new LinkedList<>()
 	private Utility utility
 	private DisplayInfo displayInfo
 
@@ -19,8 +19,16 @@ class Steps {
 		this.displayInfo = createDisplayInfo()
 	}
 
+	int size(){
+		this.stepQueue.size()
+	}
+
 	void setStepsProperty(String propertyName, String value){
 		this.stepsProperty.put(propertyName, value)
+	}
+
+	void setStep(AbstractStep step){
+		this.stepQueue.offer(step)
 	}
 
 	private boolean getShowLog(){
@@ -35,10 +43,10 @@ class Steps {
 	private DisplayInfo createDisplayInfo(){
 		return [println:{ LogType logType, String content->
 					if(logType == LogType.ERROR || logType == LogType.MESSAGE){
-						this.utility.println(content)
+						this.utility.println("${logType}:${content}")
 					}else{
 						if (this.getShowLog()){
-							this.utility.println(content)
+							this.utility.println("${logType}:${content}")
 						}
 					}}] as DisplayInfo
 	}
