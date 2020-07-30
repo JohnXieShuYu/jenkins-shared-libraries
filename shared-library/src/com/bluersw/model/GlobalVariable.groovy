@@ -3,7 +3,6 @@ package com.bluersw.model
 import com.bluersw.model.AbstractStep
 import com.bluersw.model.DisplayInfo
 import com.bluersw.model.LogType
-import com.bluersw.model.Result
 import com.bluersw.model.Utility
 import com.bluersw.model.StepType
 

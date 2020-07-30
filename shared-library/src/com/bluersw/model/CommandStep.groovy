@@ -1,10 +1,7 @@
 package com.bluersw.model
 
 import com.bluersw.model.AbstractStep
-import com.bluersw.model.Command
-import com.bluersw.model.DisplayInfo
 import com.bluersw.model.StepType
-import com.bluersw.model.Utility
 import com.bluersw.model.LogType
 
 class CommandStep extends AbstractStep {
@@ -13,12 +10,12 @@ class CommandStep extends AbstractStep {
 	private final String COMMAND_PREFIX = '#!/bin/bash'
 	private Queue<Command> queue = new LinkedList<>()
 
-	CommandStep(String name, StepType stepType, Utility utility, DisplayInfo displayInfo) {
-		super(name, stepType, utility, displayInfo)
+	CommandStep(String name, StepType stepType) {
+		super(name, stepType)
 	}
 
-	void append(Command command) {
-		this.queue.offer(command)
+	void append(String name, String command){
+		this.queue.offer(new Command(name, command))
 	}
 
 	@Override
@@ -67,5 +64,29 @@ class CommandStep extends AbstractStep {
 			stdout = this.utility.bat(script, false, true)
 		}
 		this.println(LogType.INFO, "执行：${command},输出内容：${stdout}")
+	}
+
+	 class Command {
+
+		private String command
+		private String name
+
+		Command(String name, String command){
+			this.command =command
+			this.name = name
+		}
+
+		String getName() {
+			return name
+		}
+
+		String getCommand() {
+			return command
+		}
+
+		@Override
+		String toString(){
+			return "命令名称：${this.name}，命令内容：${this.command}"
+		}
 	}
 }

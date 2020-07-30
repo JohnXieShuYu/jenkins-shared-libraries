@@ -2,7 +2,6 @@ package com.bluersw.model
 
 import com.bluersw.model.DisplayInfo
 import com.bluersw.model.LogType
-import com.bluersw.model.Result
 import com.bluersw.model.StepType
 import com.bluersw.model.Utility
 
@@ -14,17 +13,23 @@ abstract class AbstractStep {
 	protected Utility utility
 	protected DisplayInfo displayInfo
 
-	AbstractStep(String name, StepType stepType, Utility utility, DisplayInfo displayInfo) {
+	AbstractStep(String name, StepType stepType) {
 		this.name = name
 		this.stepType = stepType
-		this.utility = utility
-		this.displayInfo = displayInfo
 	}
 
 	protected void println(LogType logType, String content) {
 		if (this.displayInfo) {
 			this.displayInfo.println(logType, content)
 		}
+	}
+
+	void setDisplayInfo(DisplayInfo displayInfo) {
+		this.displayInfo = displayInfo
+	}
+
+	void setUtility(Utility utility) {
+		this.utility = utility
 	}
 
 	String getStepProperty(String propertyName) {

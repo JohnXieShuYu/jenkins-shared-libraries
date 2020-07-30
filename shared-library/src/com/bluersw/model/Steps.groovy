@@ -27,8 +27,16 @@ class Steps {
 		this.stepsProperty.put(propertyName, value)
 	}
 
-	void setStep(AbstractStep step){
+	void append(AbstractStep step){
+		step.setUtility(this.utility)
+		step.setDisplayInfo(this.displayInfo)
 		this.stepQueue.offer(step)
+	}
+
+	void run(){
+		for(AbstractStep step in this.stepQueue){
+			step.run()
+		}
 	}
 
 	private boolean getShowLog(){

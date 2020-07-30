@@ -9,10 +9,8 @@
   "Step1": {
     "执行命令": {
       "type": "COMMAND_STDOUT",
-      "script": {
-        "命令1": "ls",
-        "命令2": "date"
-      }
+      "命令1": "ls",
+      "命令2": "date"
     }
   }
 }
