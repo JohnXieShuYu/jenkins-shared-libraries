@@ -48,7 +48,7 @@ class Steps {
 	}
 
 	void run(){
-		if(getIsRun()) {
+		if(isRun()) {
 			for (AbstractStep step in this.stepQueue) {
 				this.utility.println("开始执行 [${step.getStepName()}]：")
 				step.run()
@@ -59,7 +59,7 @@ class Steps {
 		}
 	}
 
-	private boolean getShowLog(){
+	private boolean isShowLog(){
 		if(!this.stepsProperty.containsKey(SHOW_LOG_KEY_NAME)){
 			return false
 		}else{
@@ -67,7 +67,7 @@ class Steps {
 		}
 	}
 
-	private boolean getIsRun(){
+	private boolean isRun(){
 		if(!this.stepsProperty.containsKey(IS_RUN_KEY_NAME)){
 			return true
 		}else{
@@ -81,7 +81,7 @@ class Steps {
 					if(logType == LogType.ERROR || logType == LogType.MESSAGE){
 						this.utility.println("${logType}:${content}")
 					}else{
-						if (this.getShowLog()){
+						if (this.isShowLog()){
 							this.utility.println("${logType}:${content}")
 						}
 					}}] as DisplayInfo
