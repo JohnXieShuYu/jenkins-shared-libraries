@@ -12,6 +12,8 @@ class Steps {
 	private Queue<AbstractStep> stepQueue = new LinkedList<>()
 	private Utility utility
 	private DisplayInfo displayInfo
+	private final String SHOW_LOG_KEY_NAME = 'ShowLog'
+	private final String IS_RUN_KEY_NAME = 'Run'
 
 	Steps(String name, Utility utility){
 		this.name = name
@@ -46,18 +48,30 @@ class Steps {
 	}
 
 	void run(){
-		for(AbstractStep step in this.stepQueue){
-			this.utility.println("开始执行 [${step.getStepName()}]：")
-			step.run()
-			this.utility.println("[${step.getStepName()}] 执行结束。")
+		if(getIsRun()) {
+			for (AbstractStep step in this.stepQueue) {
+				this.utility.println("开始执行 [${step.getStepName()}]：")
+				step.run()
+				this.utility.println("[${step.getStepName()}] 执行结束。")
+			}
+		}else{
+			this.utility.println("跳过${this.name}节点的执行。")
 		}
 	}
 
 	private boolean getShowLog(){
-		if(!this.stepsProperty.containsKey('ShowLog')){
+		if(!this.stepsProperty.containsKey(SHOW_LOG_KEY_NAME)){
 			return false
 		}else{
-			return stepsProperty['ShowLog'] as boolean
+			return stepsProperty[SHOW_LOG_KEY_NAME] as boolean
+		}
+	}
+
+	private boolean getIsRun(){
+		if(!this.stepsProperty.containsKey(IS_RUN_KEY_NAME)){
+			return true
+		}else{
+			return stepsProperty[IS_RUN_KEY_NAME] as boolean
 		}
 	}
 

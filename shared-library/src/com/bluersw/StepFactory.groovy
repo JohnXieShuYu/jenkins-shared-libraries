@@ -18,9 +18,9 @@ class StepFactory {
 	private JSONObject jsonObject
 	private Utility utility
 	private LinkedHashMap<String, String> globalVariable
-	private final String STEP_TYPE_NODE_NAME = 'type'
+	private final String STEP_TYPE_NODE_NAME = 'Type'
 	private final String GLOBAL_VARIABLE_NODE_NAME = 'GlobalVariable'
-	private final String LOCAL_VARIABLE_NODE_NAME = "Variable"
+	private final String COMMAND_SCRIPT_NODE_NAME = 'Script'
 
 	StepFactory(String configPath, Utility utility) {
 		this.configPath = configPath
@@ -81,8 +81,11 @@ class StepFactory {
 			Map.Entry entry = (Map.Entry) iterator.next()
 			if (entry.value instanceof String) {
 				cmdStep.setStepProperty(entry.key.toString(), entry.value.toString())
-				if (entry.key.toString() != STEP_TYPE_NODE_NAME && entry.key.toString() != LOCAL_VARIABLE_NODE_NAME) {
-					cmdStep.append(entry.key.toString(), entry.value.toString())
+			}else if(entry.value instanceof JSONObject && entry.key.toString() == COMMAND_SCRIPT_NODE_NAME){
+				Iterator<String> scriptIterator = ((JSONObject)entry.value).entrySet().iterator()
+				while (scriptIterator.hasNext()){
+					Map.Entry scriptEntry = (Map.Entry) scriptIterator.next()
+					cmdStep.append(scriptEntry.key.toString(), scriptEntry.value.toString())
 				}
 			}
 		}

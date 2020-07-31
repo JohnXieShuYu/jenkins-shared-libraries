@@ -7,10 +7,18 @@
     "Email-CC": "YYY"
   },
   "Step1": {
+    "ShowLog": "true",
+    "Run": "true",
     "执行命令": {
-      "type": "COMMAND_STDOUT",
-      "命令1": "ls",
-      "命令2": "date"
+      "属性1": "false",
+      "Type": "COMMAND_STDOUT",
+      "Variable": {
+        "Var1": "ls"
+      },
+      "Script": {
+        "命令1": "${Var1}",
+        "命令2": "date"
+      }
     }
   }
 }
