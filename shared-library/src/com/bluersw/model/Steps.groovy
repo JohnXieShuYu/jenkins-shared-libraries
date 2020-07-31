@@ -19,12 +19,24 @@ class Steps {
 		this.displayInfo = createDisplayInfo()
 	}
 
+	Queue<AbstractStep> getStepQueue() {
+		return stepQueue
+	}
+
+	String getStepsName() {
+		return name
+	}
+
 	int size(){
 		this.stepQueue.size()
 	}
 
 	void setStepsProperty(String propertyName, String value){
 		this.stepsProperty.put(propertyName, value)
+	}
+
+	HashMap<String, String> getStepsProperty() {
+		return stepsProperty
 	}
 
 	void append(AbstractStep step){
@@ -35,7 +47,9 @@ class Steps {
 
 	void run(){
 		for(AbstractStep step in this.stepQueue){
+			this.utility.println("开始执行 [${step.getStepName()}]：")
 			step.run()
+			this.utility.println("[${step.getStepName()}] 执行结束。")
 		}
 	}
 

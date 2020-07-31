@@ -40,9 +40,36 @@ class StepFactory {
 		this.globalVariable.each { key, value -> this.utility.println("[${key}:${value}]") }
 	}
 
-	void run(String stepsName){
-		if(this.stepsMap.containsKey(stepsName)){
+	void run(String stepsName) {
+		if (this.stepsMap.containsKey(stepsName)) {
+			this.utility.println("开始执行 [${this.stepsMap[stepsName].getStepsName()}]:")
 			this.stepsMap[stepsName].run()
+			this.utility.println("[${this.stepsMap[stepsName].getStepsName()}] 执行结束。")
+		}
+		else {
+			this.utility.println("没有找到${stepsName}节点")
+		}
+	}
+
+	private void printStepProperty(AbstractStep step){
+		this.utility.println("[${step.getStepName()}] 节点属性:")
+		for (Map.Entry entry in step.getStepProperty()) {
+			this.utility.println("key:${entry.key} value:${entry.value}")
+		}
+	}
+
+	void printStepsProperty(String stepsName) {
+		if (this.stepsMap.containsKey(stepsName)) {
+			this.utility.println("[${this.stepsMap[stepsName].getStepsName()}] 节点属性:")
+			for (Map.Entry entry in this.stepsMap[stepsName].getStepsProperty()) {
+				this.utility.println("key:${entry.key} value:${entry.value}")
+			}
+			for(AbstractStep step in this.stepsMap[stepsName].getStepQueue()){
+				printStepProperty(step)
+			}
+		}
+		else {
+			this.utility.println("没有找到${stepsName}节点")
 		}
 	}
 
@@ -53,6 +80,7 @@ class StepFactory {
 		while (iterator.hasNext()) {
 			Map.Entry entry = (Map.Entry) iterator.next()
 			if (entry.value instanceof String) {
+				cmdStep.setStepProperty(entry.key.toString(), entry.value.toString())
 				if (entry.key.toString() != STEP_TYPE_NODE_NAME && entry.key.toString() != LOCAL_VARIABLE_NODE_NAME) {
 					cmdStep.append(entry.key.toString(), entry.value.toString())
 				}
@@ -87,9 +115,10 @@ class StepFactory {
 			Iterator<String> iterator = ((JSONObject) o).entrySet().iterator()
 			while (iterator.hasNext()) {
 				Map.Entry entry = (Map.Entry) iterator.next()
-				if(entry.value instanceof String){
+				if (entry.value instanceof String) {
 					steps.setStepsProperty(entry.key.toString(), entry.value.toString())
-				}else{
+				}
+				else {
 					AbstractStep step = createAbstractStep(entry.key.toString(), entry.value)
 					if (step != null) {
 						steps.append(step)

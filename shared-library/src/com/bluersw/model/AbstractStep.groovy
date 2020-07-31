@@ -24,6 +24,14 @@ abstract class AbstractStep {
 		}
 	}
 
+	String getStepName() {
+		return name
+	}
+
+	HashMap<String, String> getStepProperty() {
+		return stepProperty
+	}
+
 	void setDisplayInfo(DisplayInfo displayInfo) {
 		this.displayInfo = displayInfo
 	}
