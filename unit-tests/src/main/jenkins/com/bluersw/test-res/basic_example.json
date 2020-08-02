@@ -4,7 +4,8 @@
     "GV2": "2",
     "ProjectRoot": ".",
     "Email-TO": "XXX",
-    "Email-CC": "YYY"
+    "Email-CC": "YYY",
+    "LogLevel": "DEBUG"
   },
   "Step1": {
     "ShowLog": "true",

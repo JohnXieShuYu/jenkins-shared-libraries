@@ -1,11 +1,10 @@
 package com.bluersw
 
-import com.bluersw.model.AbstractStep
-import com.bluersw.model.CommandStep
+import com.bluersw.model.LogContainer
+import com.bluersw.model.LogType
+import com.bluersw.model.Step
 import com.bluersw.model.StepType
 import com.bluersw.model.Steps
-import com.bluersw.model.Utility
-import com.cloudbees.groovy.cps.NonCPS
 import hudson.remoting.Channel
 import com.bluersw.utils.JSONExtend
 import net.sf.json.JSONObject
@@ -19,112 +18,115 @@ class StepFactory {
 	private String configPath
 	private LinkedHashMap<String, Steps> stepsMap = new LinkedHashMap<>()
 	private JSONObject jsonObject
-	private Utility utility
-	private LinkedHashMap<String, String> globalVariable
-	private final String STEP_TYPE_NODE_NAME = 'Type'
-	private final String GLOBAL_VARIABLE_NODE_NAME = 'GlobalVariable'
-	private final String COMMAND_SCRIPT_NODE_NAME = 'Script'
+	static final String STEP_TYPE_NODE_NAME = 'Type'
+	static final String GLOBAL_VARIABLE_NODE_NAME = 'GlobalVariable'
+	static final String COMMAND_SCRIPT_NODE_NAME = 'Script'
+	static final String GLOBAL_LOG_LEVEL_NODE_NAME = 'LogLevel'
 
 	/**
 	 * 构造函数
 	 * @param configPath 构建配置文件路径
 	 * @param utility Jenkins环境函数或方法实现
 	 */
-	StepFactory(String configPath, Utility utility) {
+	StepFactory(String configPath) {
 		this.configPath = configPath
-		this.utility = utility
 		//加载配置文件
 		this.json = new JSONExtend(Channel.current(), configPath)
 		//获取经过变量赋值的配置文件JSON对象
 		this.jsonObject = this.json.getJsonObject()
-		//获得全局变量集合
-		this.globalVariable = this.json.getGlobalVariable()
-		//打印全局变量
-		printGlobalVariable()
-		//根据配置文件创建和初始化所有构建步骤
-		initializeSteps()
 	}
 
 	/**
-	 * 打印全局变量
+	 * 获取全局变量信息
+	 * @return 全局变量信息
 	 */
-	@NonCPS
-	void printGlobalVariable() {
-		this.utility.println("成功加载${this.configPath}文件。")
-		this.utility.println('全局变量集合：')
-		this.globalVariable.each { key, value -> this.utility.println("[${key}:${value}]") }
-	}
-
-	/**
-	 * 按构建步骤集合（Steps）名称运行构建步骤
-	 * @param stepsName 构建步骤集合（Steps）
-	 */
-	void run(String stepsName) {
-		if (this.stepsMap.containsKey(stepsName)) {
-			this.utility.println("开始执行 [${this.stepsMap[stepsName].getStepsName()}]:")
-			this.stepsMap[stepsName].run()
-			this.utility.println("[${this.stepsMap[stepsName].getStepsName()}] 执行结束。")
+	String getGlobalVariableInfo() {
+		StringBuilder builder = new StringBuilder()
+		builder.append('全局变量集合：\n')
+		if (this.stepsMap.containsKey(GLOBAL_VARIABLE_NODE_NAME)) {
+			this.stepsMap[GLOBAL_VARIABLE_NODE_NAME].getStepsProperty().each { builder.append("[${it.key}:${it.value}]\n") }
 		}
-		else {
-			this.utility.println("没有找到${stepsName}节点")
-		}
+		LogContainer.append(LogType.DEBUG, builder.toString())
+		return builder.toString()
 	}
 
 	/**
-	 * 打印构建步骤的JSON配置属性内容
-	 * @param step 构建步骤对象
+	 * 获取构建步骤的JSON配置属性内容
+	 * @param step 构建步骤
+	 * @return 构建步骤属性内容
 	 */
-	private void printStepProperty(AbstractStep step) {
-		this.utility.println("[${step.getStepName()}] 节点属性:")
+	private static String getStepPropertyInfo(Step step, StringBuilder builder) {
+		builder.append("[${step.getStepName()}] 节点属性:\n")
 		for (Map.Entry entry in step.getStepProperty()) {
-			this.utility.println("key:${entry.key} value:${entry.value}")
+			builder.append("key:${entry.key} value:${entry.value}\n")
 		}
 	}
 
+
 	/**
-	 * 打印构建步骤集合及其包含构建步骤的JSON配置属性内容
+	 * 获取构建步骤集合及其包含构建步骤的JSON配置属性内容
 	 * @param stepsName 构建步骤集合名称
+	 * @return 构建步骤集合和该集合内的构建步骤属性内容
 	 */
-	void printStepsProperty(String stepsName) {
+	String getStepsPropertyInfo(String stepsName) {
+		StringBuilder builder = new StringBuilder()
 		if (this.stepsMap.containsKey(stepsName)) {
-			this.utility.println("[${this.stepsMap[stepsName].getStepsName()}] 节点属性:")
+			builder.append("[${this.stepsMap[stepsName].getStepsName()}] 节点属性:\n")
 			for (Map.Entry entry in this.stepsMap[stepsName].getStepsProperty()) {
-				this.utility.println("key:${entry.key} value:${entry.value}")
+				builder.append("key:${entry.key} value:${entry.value}\n")
 			}
-			for (AbstractStep step in this.stepsMap[stepsName].getStepQueue()) {
-				printStepProperty(step)
+			for (Step step in this.stepsMap[stepsName].getStepQueue()) {
+				getStepPropertyInfo(step, builder)
 			}
 		}
 		else {
-			this.utility.println("没有找到${stepsName}节点")
+			builder.append("没有找到${stepsName}节点\n")
+		}
+		LogContainer.append(LogType.DEBUG, builder.toString())
+		return builder.toString()
+	}
+
+	/**
+	 * 完善循环命令构建步骤
+	 * @param step 循环命令构建步骤对象
+	 */
+	static void perfectCommandForStep(Step step) {
+		String forValue = step.getStepPropertyValue('For')
+		String scriptTemplate = step.getStepPropertyValue('ScriptTemplate')
+		if (forValue != '' && scriptTemplate != '') {
+			String[] forArray = forValue.split(',')
+			for (String str in forArray) {
+				step.appendCommand("For-${str}", scriptTemplate.replace('${loop-command-for}', str))
+			}
 		}
 	}
 
 	/**
-	 * 创建命令行类型的构建步骤对象
+	 * 使用默认方法创建构建步骤对象
 	 * @param stepName 构建步骤对象
 	 * @param stepType 构建步骤类型
-	 * @param jo 命令行类型的构建步骤对应的JSON对象
-	 * @return 命令行类型的构建步骤对象
+	 * @param jo 构建步骤对应的JSON对象
+	 * @return 构建步骤对象
 	 */
-	@NonCPS
-	CommandStep createCommandStep(String stepName, StepType stepType, JSONObject jo) {
-		CommandStep cmdStep = new CommandStep(stepName, stepType)
+	static Step defaultCreateStep(String stepName, StepType stepType, JSONObject jo) {
+		Step step = new Step(stepName, stepType)
 		Iterator<String> iterator = ((JSONObject) jo).entrySet().iterator()
 		while (iterator.hasNext()) {
 			Map.Entry entry = (Map.Entry) iterator.next()
 			if (entry.value instanceof String) {
-				cmdStep.setStepProperty(entry.key.toString(), entry.value.toString())
+				//如果是字符串则添加属性
+				step.setStepProperty(entry.key.toString(), entry.value.toString())
 			}
 			else if (entry.value instanceof JSONObject && entry.key.toString() == COMMAND_SCRIPT_NODE_NAME) {
+				//如果有Script节点则循环创建命令对象
 				Iterator<String> scriptIterator = ((JSONObject) entry.value).entrySet().iterator()
 				while (scriptIterator.hasNext()) {
 					Map.Entry scriptEntry = (Map.Entry) scriptIterator.next()
-					cmdStep.append(scriptEntry.key.toString(), scriptEntry.value.toString())
+					step.appendCommand(scriptEntry.key.toString(), scriptEntry.value.toString())
 				}
 			}
 		}
-		return cmdStep
+		return step
 	}
 
 	/**
@@ -133,16 +135,20 @@ class StepFactory {
 	 * @param o 构建步骤对应的JSON对象（也有可能不是）
 	 * @return 构建步骤对象
 	 */
-	@NonCPS
-	AbstractStep createAbstractStep(String stepName, Object o) {
-		AbstractStep step = null
+	static Step createStep(String stepName, Object o) {
+		Step step = null
 		if (o instanceof JSONObject) {
 			JSONObject stepNode = (JSONObject) o
+			//检查构建步骤类型
 			if (stepNode.containsKey(STEP_TYPE_NODE_NAME)) {
+				//获取构建步骤类型
 				StepType stepType = StepType.valueOf(stepNode.get(STEP_TYPE_NODE_NAME).toString())
-				switch (stepType) {
-				case { it == StepType.COMMAND_STATUS || it == StepType.COMMAND_STDOUT }:
-					step = createCommandStep(stepName, stepType, stepNode)
+				//使用默认方法创建构建步骤对象
+				step = defaultCreateStep(stepName, stepType, stepNode)
+				//根据构建步骤类型完善构建对象
+				switch (step.getStepType()) {
+				case (StepType.COMMAND_STDOUT_FOR):
+					perfectCommandForStep(step)
 					break
 				default:
 					break
@@ -158,18 +164,20 @@ class StepFactory {
 	 * @param o 步骤集合的JSON对象（也有可能不是）
 	 * @return 构建步骤集合（Steps）
 	 */
-	@NonCPS
-	Steps createSteps(String stepsName, Object o) {
-		Steps steps = new Steps(stepsName, this.utility)
+	static Steps createSteps(String stepsName, Object o) {
+		//创建构建步骤集合
+		Steps steps = new Steps(stepsName)
 		if (o instanceof JSONObject) {
 			Iterator<String> iterator = ((JSONObject) o).entrySet().iterator()
+			//循环构建步骤集合的子节点
 			while (iterator.hasNext()) {
 				Map.Entry entry = (Map.Entry) iterator.next()
 				if (entry.value instanceof String) {
+					//如果是字符串就当成属性添加
 					steps.setStepsProperty(entry.key.toString(), entry.value.toString())
 				}
-				else {
-					AbstractStep step = createAbstractStep(entry.key.toString(), entry.value)
+				else {//如果不是字符串就尝试创建构建步骤对象
+					Step step = createStep(entry.key.toString(), entry.value)
 					if (step != null) {
 						steps.append(step)
 					}
@@ -182,21 +190,75 @@ class StepFactory {
 	/**
 	 * 根据构建配置创建和初始化对应的构建对象
 	 */
-	@NonCPS
 	void initializeSteps() {
 		Iterator<String> iterator = this.jsonObject.entrySet().iterator()
 		//循环配置文件JSON格式的第一层节点
 		while (iterator.hasNext()) {
 			Map.Entry entry = (Map.Entry) iterator.next()
-			//跳过全局配置节点
-			if (entry.key.toString() != GLOBAL_VARIABLE_NODE_NAME) {
-				//因为默认第一层节点为步骤集合Steps，所以尝试创建构建步骤集合对象
-				Steps steps = createSteps(entry.key.toString(), entry.value)
-				//抛弃构建步骤为0的对象
-				if (steps.size() > 0) {
-					this.stepsMap.put(entry.key.toString(), steps)
+			//因为默认第一层节点为步骤集合Steps，所以尝试创建构建步骤集合对象
+			Steps steps = createSteps(entry.key.toString(), entry.value)
+			//如果构建步骤集合中有内容（有效）或构建步骤是全局配置则加到Map中
+			if (steps.isValid() || steps.getStepsName() == GLOBAL_VARIABLE_NODE_NAME) {
+				this.stepsMap.put(entry.key.toString(), steps)
+			}
+		}
+	}
+
+	/**
+	 * 完善构建集合的属性
+	 */
+	void perfectStepsProperty() {
+		Iterator<Map.Entry<String, Steps>> iterator = this.stepsMap.entrySet().iterator()
+		while (iterator.hasNext()) {
+			Map.Entry<String, Steps> entry = (Map.Entry<String, Steps>) iterator.next()
+			Steps steps = entry.value
+			if (steps.getStepsName() == GLOBAL_VARIABLE_NODE_NAME) {
+				if (steps.getStepsPropertyValue('ProjectRoot') == '') {
+					steps.setStepsProperty('ProjectRoot', '.')
+				}
+				if (steps.getStepsPropertyValue(GLOBAL_LOG_LEVEL_NODE_NAME) == '') {
+					steps.setStepsProperty(GLOBAL_LOG_LEVEL_NODE_NAME, LogType.INFO.toString())
 				}
 			}
+			else {
+				if (steps.getStepsPropertyValue(Steps.IS_RUN_KEY_NAME) == '') {
+					steps.setStepsProperty(Steps.IS_RUN_KEY_NAME, 'true')
+				}
+				if (steps.getStepsPropertyValue(Steps.SHOW_LOG_KEY_NAME) == '') {
+					steps.setStepsProperty(Steps.SHOW_LOG_KEY_NAME, 'false')
+				}
+			}
+		}
+	}
+
+	/**
+	 * 构建过程对象初始化
+	 */
+	void initialize() {
+		LogContainer.append(LogType.INFO, '开始初始化.....')
+		initializeSteps()
+		LogContainer.append(LogType.INFO, '构建步骤初始化完成')
+		perfectStepsProperty()
+		LogContainer.append(LogType.INFO, '完善构建步骤属性')
+		if (getLogLevel() > LogType.DEBUG) {
+			LogContainer.append(LogType.INFO, getGlobalVariableInfo())
+		}
+		else {
+			this.stepsMap.keySet().each { getStepsPropertyInfo(it) }
+		}
+		LogContainer.append(LogType.INFO, '初始化完成')
+	}
+
+	/**
+	 * 获得全局变量中的日志级别
+	 * @return 全局变量中的日志级别
+	 */
+	LogType getLogLevel() {
+		if (this.stepsMap.containsKey(GLOBAL_VARIABLE_NODE_NAME)) {
+			return Enum.valueOf(LogType.class, this.stepsMap[GLOBAL_VARIABLE_NODE_NAME].getStepsPropertyValue(GLOBAL_LOG_LEVEL_NODE_NAME))
+		}
+		else {
+			return LogType.INFO
 		}
 	}
 }

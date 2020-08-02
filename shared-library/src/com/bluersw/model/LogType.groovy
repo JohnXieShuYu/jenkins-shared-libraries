@@ -1,7 +1,7 @@
 package com.bluersw.model
 
 enum LogType {
-	MESSAGE,
+	DEBUG,
 	INFO,
 	WARNING,
 	ERROR

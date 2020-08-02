@@ -3,6 +3,8 @@ package com.bluersw.utils
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import com.bluersw.model.LogContainer
+import com.bluersw.model.LogType
 import com.cloudbees.groovy.cps.NonCPS
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel
@@ -26,7 +28,6 @@ class JSONExtend {
 	private JSONObject jsonObject
 	private LinkedHashMap<String, String> globalVariable = new LinkedHashMap<>()
 	private LinkedHashMap<String, LinkedHashMap<String, String>> localVariable = new LinkedHashMap<>()
-	private StringBuffer info = new StringBuffer()
 
 
 	/**
@@ -53,29 +54,17 @@ class JSONExtend {
 		analyzeJSONObject(this.jsonObject, '')
 	}
 
+	@NonCPS
 	JSONObject getJsonObject() {
 		return jsonObject
 	}
 
-	String getInfo() {
-		return info.toString()
-	}
-
 	@NonCPS
-	void addInfo(String... args) {
-		for (int i = 0; i < args.length; i++) {
-			info.append(args[i])
-			if (i != args.length - 1) {
-				info.append(':')
-			}
-		}
-		info.append('\r\n')
-	}
-
 	LinkedHashMap<String, String> getGlobalVariable() {
 		return globalVariable
 	}
 
+	@NonCPS
 	LinkedHashMap<String, LinkedHashMap<String, String>> getLocalVariable() {
 		return localVariable
 	}
@@ -134,7 +123,7 @@ class JSONExtend {
 	 * @return 变量值内容中包含其他变量名称进行赋值替换后返回
 	 */
 	@NonCPS
-	private String transformVariableValue(String varName, String value, LinkedHashMap<String, String> range) {
+	private static String transformVariableValue(String varName, String value, LinkedHashMap<String, String> range) {
 		//判断自引用情况
 		if (value.indexOf("\${${varName}}") != -1) {
 			throw new IllegalArgumentException("变量定义的值内容中包含自身变量的引用，这会引起死循环赋值。")
@@ -158,7 +147,7 @@ class JSONExtend {
 	 * @return 作用域层次集合（由近及远）
 	 */
 	@NonCPS
-	private List<String> splitScopeLevel(String xpath){
+	private static List<String> splitScopeLevel(String xpath){
 		//分解作用域层次
 		String scope = xpath
 		List<String> scopeList = new ArrayList<>()
@@ -235,7 +224,7 @@ class JSONExtend {
 				entry.value = transformNodeValue(xpath,entry.value.toString())
 
 				//添加日志
-				addInfo(xpath, entry.value.toString())
+				LogContainer.append(LogType.DEBUG,"${xpath} - ${entry.value.toString()}")
 			}
 			else {
 				entrys = entry.value.iterator()

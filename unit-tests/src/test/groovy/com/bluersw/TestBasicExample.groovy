@@ -1,6 +1,7 @@
 package com.bluersw
 
 import com.lesfurets.jenkins.unit.BasePipelineTest
+import com.lesfurets.jenkins.unit.cps.BasePipelineTestCPS
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

@@ -1,89 +1,65 @@
 package com.bluersw.model
 
-import com.bluersw.model.AbstractStep
-import com.bluersw.model.DisplayInfo
+import java.util.Queue
+
+import com.bluersw.model.LogContainer
 import com.bluersw.model.LogType
-import com.bluersw.model.Utility
+import com.bluersw.model.Step
 import com.cloudbees.groovy.cps.NonCPS
 
 class Steps {
 	private String name
-	private HashMap<String, String> stepsProperty = new HashMap<>()
-	private Queue<AbstractStep> stepQueue = new LinkedList<>()
-	private Utility utility
-	private DisplayInfo displayInfo
-	private final String SHOW_LOG_KEY_NAME = 'ShowLog'
-	private final String IS_RUN_KEY_NAME = 'Run'
+	HashMap<String, String> stepsProperty = new HashMap<>()
+	Queue<Step> stepQueue = new LinkedList<>()
+	static final String SHOW_LOG_KEY_NAME = 'ShowLog'
+	static final String IS_RUN_KEY_NAME = 'Run'
 
-	Steps(String name, Utility utility){
+	Steps(String name) {
 		this.name = name
-		this.utility = utility
-		this.displayInfo = createDisplayInfo()
-	}
-
-	Queue<AbstractStep> getStepQueue() {
-		return stepQueue
 	}
 
 	String getStepsName() {
-		return name
+		return this.name
 	}
 
-	int size(){
-		this.stepQueue.size()
+	boolean isValid() {
+		return this.stepQueue.size() > 0 || this.stepsProperty.size() > 0
 	}
 
-	void setStepsProperty(String propertyName, String value){
-		this.stepsProperty.put(propertyName, value)
-	}
-
-	HashMap<String, String> getStepsProperty() {
-		return stepsProperty
-	}
-
-	void append(AbstractStep step){
-		step.setUtility(this.utility)
-		step.setDisplayInfo(this.displayInfo)
-		this.stepQueue.offer(step)
-	}
-
-	void run(){
-		if(isRun()) {
-			for (AbstractStep step in this.stepQueue) {
-				this.utility.println("开始执行 [${step.getStepName()}]：")
-				step.run()
-				this.utility.println("[${step.getStepName()}] 执行结束。")
-			}
-		}else{
-			this.utility.println("跳过${this.name}节点的执行。")
+	void setStepsProperty(String propertyName, String value) {
+		if (this.stepsProperty.containsKey(propertyName)) {
+			LogContainer.append(LogType.WARNING, "节点：${this.name}，名称为：${propertyName}的属性已经存在，该属性的内容被覆盖为：${value}")
 		}
+		this.stepsProperty.put(propertyName, value)
+		LogContainer.append(LogType.DEBUG, "设置${this.name}节点${propertyName}属性，值：${value}")
 	}
 
-	private boolean isShowLog(){
-		if(!this.stepsProperty.containsKey(SHOW_LOG_KEY_NAME)){
+	String getStepsPropertyValue(String propertyName) {
+		String value = this.stepsProperty.getOrDefault(propertyName, '')
+		LogContainer.append(LogType.DEBUG, "读取${this.name}节点${propertyName}属性，返回值：${value}")
+		return value
+	}
+
+	void append(Step step) {
+		this.stepQueue.offer(step)
+		LogContainer.append(LogType.DEBUG, "${this.name}节点：添加${step.getStepName()}步骤，类型为：${step.getStepType()}")
+	}
+
+	private boolean isShowLog() {
+		if (!this.stepsProperty.containsKey(SHOW_LOG_KEY_NAME)) {
 			return false
-		}else{
+		}
+		else {
 			return stepsProperty[SHOW_LOG_KEY_NAME] as boolean
 		}
 	}
 
-	private boolean isRun(){
-		if(!this.stepsProperty.containsKey(IS_RUN_KEY_NAME)){
+	private boolean isRun() {
+		if (!this.stepsProperty.containsKey(IS_RUN_KEY_NAME)) {
 			return true
-		}else{
+		}
+		else {
 			return stepsProperty[IS_RUN_KEY_NAME] as boolean
 		}
-	}
-
-	@NonCPS
-	private DisplayInfo createDisplayInfo(){
-		return [println:{ LogType logType, String content->
-					if(logType == LogType.ERROR || logType == LogType.MESSAGE){
-						this.utility.println("${logType}:${content}")
-					}else{
-						if (this.isShowLog()){
-							this.utility.println("${logType}:${content}")
-						}
-					}}] as DisplayInfo
 	}
 }
