@@ -51,19 +51,6 @@ class StepFactory {
 	}
 
 	/**
-	 * 获取构建步骤的JSON配置属性内容
-	 * @param step 构建步骤
-	 * @return 构建步骤属性内容
-	 */
-	private static String getStepPropertyInfo(Step step, StringBuilder builder) {
-		builder.append("[${step.getStepName()}] 节点属性:\n")
-		for (Map.Entry entry in step.getStepProperty()) {
-			builder.append("key:${entry.key} value:${entry.value}\n")
-		}
-	}
-
-
-	/**
 	 * 获取构建步骤集合及其包含构建步骤的JSON配置属性内容
 	 * @param stepsName 构建步骤集合名称
 	 * @return 构建步骤集合和该集合内的构建步骤属性内容
@@ -259,6 +246,18 @@ class StepFactory {
 		}
 		else {
 			return LogType.INFO
+		}
+	}
+
+	/**
+	 * 获取构建步骤的JSON配置属性内容
+	 * @param step 构建步骤
+	 * @return 构建步骤属性内容
+	 */
+	private static String getStepPropertyInfo(Step step, StringBuilder builder) {
+		builder.append("[${step.getStepName()}] 节点属性:\n")
+		for (Map.Entry entry in step.getStepProperty()) {
+			builder.append("key:${entry.key} value:${entry.value}\n")
 		}
 	}
 }
