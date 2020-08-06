@@ -2,8 +2,11 @@
   "GlobalVariable": {
   },
   "Step1": {
-    "Script": {
-      "command-1": "pwd"
+    "Step": {
+      "Type": "COMMAND_STATUS",
+      "Script": {
+        "command-1": "java -version 2>&1"
+      }
     }
   }
 }
