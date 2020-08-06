@@ -20,7 +20,7 @@ void runSteps(String stepsName){
 	for(StepFactory factory in this.factories){
 		println("开始执行[${factory.configPath}]的[${stepsName}]")
 		Steps steps = factory.getStepsByName(stepsName)
-		if(steps != null) {
+		if(steps != null && steps.isRun()) {
 			for (Step step in steps.stepQueue) {
 				println("开始执行[${stepsName}]的[${step.name}]")
 				runStep(step)

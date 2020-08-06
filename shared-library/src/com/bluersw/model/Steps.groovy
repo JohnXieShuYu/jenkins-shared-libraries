@@ -45,7 +45,7 @@ class Steps {
 		LogContainer.append(LogType.DEBUG, "${this.name}节点：添加${step.name}步骤，类型为：${step.stepType}")
 	}
 
-	private boolean isShowLog() {
+	boolean isShowLog() {
 		if (!this.stepsProperty.containsKey(SHOW_LOG_KEY_NAME)) {
 			return false
 		}
@@ -54,7 +54,7 @@ class Steps {
 		}
 	}
 
-	private boolean isRun() {
+	boolean isRun() {
 		if (!this.stepsProperty.containsKey(IS_RUN_KEY_NAME)) {
 			return true
 		}
