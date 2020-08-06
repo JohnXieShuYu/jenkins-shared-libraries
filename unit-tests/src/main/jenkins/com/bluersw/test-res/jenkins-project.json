@@ -1,0 +1,9 @@
+{
+  "GlobalVariable": {
+  },
+  "Step1": {
+    "Script": {
+      "command-1": "pwd"
+    }
+  }
+}

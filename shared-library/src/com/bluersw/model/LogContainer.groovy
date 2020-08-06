@@ -15,6 +15,28 @@ class LogContainer {
 		queue.offer(new LogInfo(logType, "${date}-${message}"))
 	}
 
+	static String getLogByTag(String startTag,String endTag, LogType logType){
+		boolean findTag = false
+		Object[] array = null
+		StringBuilder builder = new StringBuilder()
+		array = queue.toArray()
+		for (Object o in array) {
+			LogInfo logInfo = (LogInfo) o
+			if(logInfo.message.endsWith(startTag)){
+				findTag = true
+			}
+			if(findTag) {
+				if (logInfo.type >= logType) {
+					builder.append(logInfo)
+				}
+			}
+			if(logInfo.message.endsWith(endTag)){
+				findTag = false
+			}
+		}
+		return builder.toString()
+	}
+
 	static String getLog(LogType logType) {
 		Object[] array = null
 		StringBuilder builder = new StringBuilder()

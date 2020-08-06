@@ -1,4 +1,6 @@
 import com.bluersw.StepFactory
+import com.bluersw.model.LogContainer
+import com.bluersw.model.LogType
 import groovy.transform.Field
 
 @Field LinkedList<StepFactory> factories
@@ -10,22 +12,32 @@ def call(String projectPaths){
 	return this
 }
 
-static LinkedList<StepFactory> createStepFactory(String[] jsonFile){
+void printLoadFactoryLog(){
+	for(StepFactory factory in this.factories){
+		//打印装载配置文件日志
+		LogType logLevel= factory.getLogLevel()
+		println(LogContainer.getLogByTag(factory.getInitStartTag(),factory.getInitEndTag(),logLevel))
+	}
+}
+
+private static LinkedList<StepFactory> createStepFactory(String[] jsonFile){
 	LinkedList<StepFactory> factoryList = new LinkedList<>()
 	for(String json in jsonFile){
-		factoryList.add(new StepFactory(json))
+		StepFactory factory = new StepFactory(json)
+		factory.initialize()
+		factoryList.add(factory)
 	}
 	return factoryList
 }
 
-static String[] getDirectories(String projectPaths){
+private static String[] getDirectories(String projectPaths){
 	String[] paths = projectPaths.split(',')
 	//设置构建配置文件
 	configJSONFilePath(paths)
 	return paths
 }
 
-static void configJSONFilePath(String[] dirs){
+private static void configJSONFilePath(String[] dirs){
 	for(int i = 0; i<dirs.length;i++){
 		if(!dirs[i].endsWith('.json')){
 			//默认项目根目录或子项目目录下jenkins-project.json作为构建配置文件

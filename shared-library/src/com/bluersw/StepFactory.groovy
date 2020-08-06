@@ -22,6 +22,7 @@ class StepFactory {
 	static final String GLOBAL_VARIABLE_NODE_NAME = 'GlobalVariable'
 	static final String COMMAND_SCRIPT_NODE_NAME = 'Script'
 	static final String GLOBAL_LOG_LEVEL_NODE_NAME = 'LogLevel'
+	static final String INIT_LOG_END_TAG = '初始化完成----------'
 
 	/**
 	 * 构造函数
@@ -46,6 +47,7 @@ class StepFactory {
 		if (this.stepsMap.containsKey(GLOBAL_VARIABLE_NODE_NAME)) {
 			this.stepsMap[GLOBAL_VARIABLE_NODE_NAME].getStepsProperty().each { builder.append("[${it.key}:${it.value}]\n") }
 		}
+		builder.append('全局变量输出完成')
 		LogContainer.append(LogType.DEBUG, builder.toString())
 		return builder.toString()
 	}
@@ -65,6 +67,7 @@ class StepFactory {
 			for (Step step in this.stepsMap[stepsName].getStepQueue()) {
 				getStepPropertyInfo(step, builder)
 			}
+			builder.append("[${this.stepsMap[stepsName].getStepsName()}] 属性输出完成:")
 		}
 		else {
 			builder.append("没有找到${stepsName}节点\n")
@@ -73,11 +76,50 @@ class StepFactory {
 		return builder.toString()
 	}
 
+	String getInitStartTag(){
+		return this.configPath
+	}
+
+	static String getInitEndTag(){
+		return INIT_LOG_END_TAG
+	}
+
+	/**
+	 * 构建过程对象初始化
+	 */
+	void initialize() {
+		LogContainer.append(LogType.INFO, this.getInitStartTag())
+		LogContainer.append(LogType.INFO, '开始初始化..........')
+		initializeSteps()
+		LogContainer.append(LogType.INFO, '构建步骤初始化完成')
+		perfectStepsProperty()
+		LogContainer.append(LogType.INFO, '完善构建步骤属性')
+		if (getLogLevel() <= LogType.DEBUG) {
+			getGlobalVariableInfo()
+			this.stepsMap.keySet().each { getStepsPropertyInfo(it) }
+		}
+
+		LogContainer.append(LogType.INFO, getInitEndTag())
+	}
+
+	/**
+	 * 获得全局变量中的日志级别
+	 * @return 全局变量中的日志级别
+	 */
+	LogType getLogLevel() {
+		if (this.stepsMap.containsKey(GLOBAL_VARIABLE_NODE_NAME)) {
+			return Enum.valueOf(LogType.class, this.stepsMap[GLOBAL_VARIABLE_NODE_NAME].getStepsPropertyValue(GLOBAL_LOG_LEVEL_NODE_NAME))
+		}
+		else {
+			return LogType.INFO
+		}
+	}
+
 	/**
 	 * 完善循环命令构建步骤
 	 * @param step 循环命令构建步骤对象
 	 */
-	static void perfectCommandForStep(Step step) {
+	private static void perfectCommandForStep(Step step) {
 		String forValue = step.getStepPropertyValue('For')
 		String scriptTemplate = step.getStepPropertyValue('ScriptTemplate')
 		if (forValue != '' && scriptTemplate != '') {
@@ -95,7 +137,7 @@ class StepFactory {
 	 * @param jo 构建步骤对应的JSON对象
 	 * @return 构建步骤对象
 	 */
-	static Step defaultCreateStep(String stepName, StepType stepType, JSONObject jo) {
+	private static Step defaultCreateStep(String stepName, StepType stepType, JSONObject jo) {
 		Step step = new Step(stepName, stepType)
 		Iterator<String> iterator = ((JSONObject) jo).entrySet().iterator()
 		while (iterator.hasNext()) {
@@ -122,7 +164,7 @@ class StepFactory {
 	 * @param o 构建步骤对应的JSON对象（也有可能不是）
 	 * @return 构建步骤对象
 	 */
-	static Step createStep(String stepName, Object o) {
+	private static Step createStep(String stepName, Object o) {
 		Step step = null
 		if (o instanceof JSONObject) {
 			JSONObject stepNode = (JSONObject) o
@@ -151,7 +193,7 @@ class StepFactory {
 	 * @param o 步骤集合的JSON对象（也有可能不是）
 	 * @return 构建步骤集合（Steps）
 	 */
-	static Steps createSteps(String stepsName, Object o) {
+	private static Steps createSteps(String stepsName, Object o) {
 		//创建构建步骤集合
 		Steps steps = new Steps(stepsName)
 		if (o instanceof JSONObject) {
@@ -177,7 +219,7 @@ class StepFactory {
 	/**
 	 * 根据构建配置创建和初始化对应的构建对象
 	 */
-	void initializeSteps() {
+	private void initializeSteps() {
 		Iterator<String> iterator = this.jsonObject.entrySet().iterator()
 		//循环配置文件JSON格式的第一层节点
 		while (iterator.hasNext()) {
@@ -194,7 +236,7 @@ class StepFactory {
 	/**
 	 * 完善构建集合的属性
 	 */
-	void perfectStepsProperty() {
+	private void perfectStepsProperty() {
 		Iterator<Map.Entry<String, Steps>> iterator = this.stepsMap.entrySet().iterator()
 		while (iterator.hasNext()) {
 			Map.Entry<String, Steps> entry = (Map.Entry<String, Steps>) iterator.next()
@@ -215,37 +257,6 @@ class StepFactory {
 					steps.setStepsProperty(Steps.SHOW_LOG_KEY_NAME, 'false')
 				}
 			}
-		}
-	}
-
-	/**
-	 * 构建过程对象初始化
-	 */
-	void initialize() {
-		LogContainer.append(LogType.INFO, '开始初始化.....')
-		initializeSteps()
-		LogContainer.append(LogType.INFO, '构建步骤初始化完成')
-		perfectStepsProperty()
-		LogContainer.append(LogType.INFO, '完善构建步骤属性')
-		if (getLogLevel() > LogType.DEBUG) {
-			LogContainer.append(LogType.INFO, getGlobalVariableInfo())
-		}
-		else {
-			this.stepsMap.keySet().each { getStepsPropertyInfo(it) }
-		}
-		LogContainer.append(LogType.INFO, '初始化完成')
-	}
-
-	/**
-	 * 获得全局变量中的日志级别
-	 * @return 全局变量中的日志级别
-	 */
-	LogType getLogLevel() {
-		if (this.stepsMap.containsKey(GLOBAL_VARIABLE_NODE_NAME)) {
-			return Enum.valueOf(LogType.class, this.stepsMap[GLOBAL_VARIABLE_NODE_NAME].getStepsPropertyValue(GLOBAL_LOG_LEVEL_NODE_NAME))
-		}
-		else {
-			return LogType.INFO
 		}
 	}
 
