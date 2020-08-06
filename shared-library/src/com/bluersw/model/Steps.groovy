@@ -42,7 +42,7 @@ class Steps {
 
 	void append(Step step) {
 		this.stepQueue.offer(step)
-		LogContainer.append(LogType.DEBUG, "${this.name}节点：添加${step.getStepName()}步骤，类型为：${step.getStepType()}")
+		LogContainer.append(LogType.DEBUG, "${this.name}节点：添加${step.name}步骤，类型为：${step.stepType}")
 	}
 
 	private boolean isShowLog() {

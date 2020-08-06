@@ -5,24 +5,17 @@ import java.util.Queue
 import com.bluersw.model.LogContainer
 import com.bluersw.model.LogType
 import com.bluersw.model.StepType
+import com.bluersw.model.Command
 
 class Step {
-	private String name
-	private StepType stepType
+	String name
+	StepType stepType
 	HashMap<String, String> stepProperty = new HashMap<>()
 	Queue<Command> commandQueue = new LinkedList<>()
 
 	Step(String name, StepType stepType) {
 		this.name = name
 		this.stepType = stepType
-	}
-
-	String getStepName() {
-		return this.name
-	}
-
-	StepType getStepType() {
-		return stepType
 	}
 
 	String getStepPropertyValue(String propertyName) {
@@ -44,40 +37,12 @@ class Step {
 		LogContainer.append(LogType.DEBUG, "添加${this.name}节点${name}的命令，内容：${command}")
 	}
 
-	Queue<Command> getCommandQueue() {
-		return commandQueue
-	}
-
 	boolean containsCommands() {
 		if (this.commandQueue.size() > 0) {
 			return true
 		}
 		else {
 			return false
-		}
-	}
-
-	static class Command {
-
-		private String command
-		private String name
-
-		Command(String name, String command) {
-			this.command = command
-			this.name = name
-		}
-
-		String getName() {
-			return name
-		}
-
-		String getCommand() {
-			return command
-		}
-
-		@Override
-		String toString() {
-			return "命令名称：${this.name}，命令内容：${this.command}"
 		}
 	}
 }

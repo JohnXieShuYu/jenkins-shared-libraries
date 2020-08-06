@@ -20,7 +20,10 @@ class TestRunWrapper extends BasePipelineTest{
 	void setUp() throws Exception {
 		scriptRoots += 'src/main/jenkins'
 		super.setUp()
-		binding.setVariable('scm', [branch: 'master'])}
+		binding.setVariable('scm', [branch: 'master'])
+		helper.registerAllowedMethod('isUnix',[],{true})
+		helper.registerAllowedMethod('sh',[Map.class],{println("执行${it['script']}")})
+	}
 
 	@Test
 	void test_RunWrapper() throws Exception{

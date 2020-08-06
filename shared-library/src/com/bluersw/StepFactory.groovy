@@ -15,7 +15,7 @@ import net.sf.json.JSONObject
 class StepFactory {
 
 	private JSONExtend json
-	private String configPath
+	String configPath
 	private LinkedHashMap<String, Steps> stepsMap = new LinkedHashMap<>()
 	private JSONObject jsonObject
 	static final String STEP_TYPE_NODE_NAME = 'Type'
@@ -102,6 +102,14 @@ class StepFactory {
 		LogContainer.append(LogType.INFO, getInitEndTag())
 	}
 
+	Steps getStepsByName(String stepsName){
+		if(this.stepsMap.containsKey(stepsName)) {
+			return this.stepsMap[stepsName]
+		}else{
+			return null
+		}
+	}
+
 	/**
 	 * 获得全局变量中的日志级别
 	 * @return 全局变量中的日志级别
@@ -175,7 +183,7 @@ class StepFactory {
 				//使用默认方法创建构建步骤对象
 				step = defaultCreateStep(stepName, stepType, stepNode)
 				//根据构建步骤类型完善构建对象
-				switch (step.getStepType()) {
+				switch (step.stepType) {
 				case (StepType.COMMAND_STDOUT_FOR):
 					perfectCommandForStep(step)
 					break
@@ -266,7 +274,7 @@ class StepFactory {
 	 * @return 构建步骤属性内容
 	 */
 	private static String getStepPropertyInfo(Step step, StringBuilder builder) {
-		builder.append("[${step.getStepName()}] 节点属性:\n")
+		builder.append("[${step.name}] 节点属性:\n")
 		for (Map.Entry entry in step.getStepProperty()) {
 			builder.append("key:${entry.key} value:${entry.value}\n")
 		}
