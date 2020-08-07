@@ -14,7 +14,7 @@
       "属性1": "false",
       "Type": "COMMAND_STATUS",
       "Variable": {
-        "Var1": "ls"
+        "Var1": "pwd"
       },
       "Script": {
         "命令1": "${Var1}",

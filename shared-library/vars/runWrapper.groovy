@@ -55,7 +55,7 @@ private void runCommand(step) {
 		def runScript = runScript()
 		println("开始执行[${cmd.name}]的${cmd.command}命令")
 		if (step.stepType == StepType.COMMAND_STATUS) {
-			result = runScript.returnStatus(cmd.command)
+			result = runStatusScript(cmd.command)
 		}
 		else {
 			result = runScript.returnStdout(cmd.command)
