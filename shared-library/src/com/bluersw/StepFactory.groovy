@@ -184,7 +184,7 @@ class StepFactory {
 				step = defaultCreateStep(stepName, stepType, stepNode)
 				//根据构建步骤类型完善构建对象
 				switch (step.stepType) {
-				case (StepType.COMMAND_STDOUT_FOR):
+				case (StepType.COMMAND_STATUS_FOR):
 					perfectCommandForStep(step)
 					break
 				default:

@@ -52,13 +52,12 @@ private runStep(Step step) {
 private void runCommand(step) {
 	for (Command cmd in step.commandQueue) {
 		def result = null
-		def runScript = runScript()
 		println("开始执行[${cmd.name}]的${cmd.command}命令")
-		if (step.stepType == StepType.COMMAND_STATUS) {
-			result = runStatusScript(cmd.command)
+		if (step.stepType == StepType.COMMAND_STDOUT) {
+			result = runStdoutScript(cmd.command)
 		}
 		else {
-			result = runScript.returnStdout(cmd.command)
+			result = runStatusScript(cmd.command)
 		}
 		println("执行完成[${result}]")
 	}

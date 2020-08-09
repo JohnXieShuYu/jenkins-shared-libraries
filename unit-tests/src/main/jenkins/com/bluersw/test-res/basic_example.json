@@ -12,9 +12,9 @@
     "Run": "true",
     "执行命令": {
       "属性1": "false",
-      "Type": "COMMAND_STATUS",
+      "Type": "COMMAND_STDOUT",
       "Variable": {
-        "Var1": "pwd"
+        "Var1": "ls"
       },
       "Script": {
         "命令1": "${Var1}",
