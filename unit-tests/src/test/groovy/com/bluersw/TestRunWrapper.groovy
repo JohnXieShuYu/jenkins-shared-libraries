@@ -1,6 +1,7 @@
 package com.bluersw
 
 import com.lesfurets.jenkins.unit.BasePipelineTest
+import com.lesfurets.jenkins.unit.declarative.DeclarativePipelineTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -9,7 +10,7 @@ import org.junit.rules.TemporaryFolder
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 
-class TestRunWrapper extends BasePipelineTest{
+class TestRunWrapper extends DeclarativePipelineTest{
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder()
 

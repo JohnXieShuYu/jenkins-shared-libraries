@@ -10,24 +10,25 @@ import groovy.transform.Field
 @Field LinkedList<StepFactory> factories
 @Field String[] jsonFilePaths
 
-def call(String projectPaths){
+void loadJSON(String projectPaths){
 	this.jsonFilePaths = getDirectories(projectPaths)
 	this.factories = createStepFactory(this.jsonFilePaths)
-	return this
 }
 
-void runSteps(String stepsName){
-	for(StepFactory factory in this.factories){
+void runJsonSteps(String stepsName) {
+	for (int factoryIndex = 0; factoryIndex < this.factories.size(); factoryIndex++) {
+		StepFactory factory = this.factories[factoryIndex]
 		println("开始执行[${factory.configPath}]的[${stepsName}]")
 		Steps steps = factory.getStepsByName(stepsName)
-		if(steps != null && steps.isRun()) {
-			for (Step step in steps.stepQueue) {
+		if (steps != null && steps.isRun()) {
+			for (int stepIndex = 0; stepIndex < steps.stepQueue.size(); stepIndex++) {
+				Step step = steps.stepQueue[stepIndex]
 				println("开始执行[${stepsName}]的[${step.name}]")
-				runStep(step)
+				runJsonStep(step)
 				println("执行[${step.name}]完成")
 			}
+			println("执行[${stepsName}]完成")
 		}
-		println("执行[${stepsName}]完成")
 	}
 }
 
@@ -39,7 +40,7 @@ void printLoadFactoryLog() {
 	}
 }
 
-private runStep(Step step) {
+private void runJsonStep(Step step) {
 	switch (step.stepType) {
 	default:
 		break
@@ -49,8 +50,9 @@ private runStep(Step step) {
 	}
 }
 
-private void runCommand(step) {
-	for (Command cmd in step.commandQueue) {
+private void runCommand(Step step) {
+	for (int i = 0; i < step.commandQueue.size(); i++) {
+		Command cmd = step.commandQueue[i]
 		def result = null
 		println("开始执行[${cmd.name}]的${cmd.command}命令")
 		if (step.stepType == StepType.COMMAND_STDOUT) {
