@@ -63,9 +63,22 @@ private void runCommand(Step step) {
 		println("开始执行[${cmd.name}]的${cmd.command}命令")
 		if (step.stepType == StepType.COMMAND_STDOUT) {
 			result = runStdoutScript(cmd.command)
+			String success = step.getStepPropertyValue('Success-IndexOf')
+			if (success != '' && result != null && !result.toString().indexOf(success)) {
+				throw new Exception("[${cmd.command}]执行失败，返回[${result}]")
+			}
+			else {
+				String fail = step.getStepPropertyValue('Fail-IndexOf')
+				if (fail != '' && result != null && result.toString().indexOf(fail)) {
+					throw new Exception("[${cmd.command}]执行失败，返回[${result}]")
+				}
+			}
 		}
 		else {
 			result = runStatusScript(cmd.command)
+			if (result != null && result != 0) {
+				throw new Exception("[${cmd.command}]执行返回非0，返回[${result}]")
+			}
 		}
 		println("执行完成[${result}]")
 	}

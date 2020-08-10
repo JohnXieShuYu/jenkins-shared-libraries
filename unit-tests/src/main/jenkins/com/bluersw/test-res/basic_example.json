@@ -11,14 +11,13 @@
     "ShowLog": "true",
     "Run": "true",
     "执行命令": {
-      "属性1": "false",
+      "Success-IndexOf": "test-res",
       "Type": "COMMAND_STDOUT",
       "Variable": {
         "Var1": "ls"
       },
       "Script": {
-        "命令1": "${Var1}",
-        "命令2": "date"
+        "命令1": "${Var1}"
       }
     }
   }
