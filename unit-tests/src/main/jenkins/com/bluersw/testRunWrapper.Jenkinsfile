@@ -13,6 +13,7 @@ pipeline {
                     runWrapper.loadJSON('./src/main/jenkins/com/bluersw/test-res/basic_example.json,./src/main/jenkins/com/bluersw/test-res/')
                     runWrapper.printLoadFactoryLog()
                     runWrapper.runJsonSteps('Step1')
+                    runWrapper.bindJenkinsVariable(this)
                 }
             }
         }

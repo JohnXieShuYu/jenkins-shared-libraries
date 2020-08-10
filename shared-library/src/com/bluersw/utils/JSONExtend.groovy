@@ -44,16 +44,6 @@ class JSONExtend {
 		analyzeJSONObject(this.jsonObject, '')
 	}
 
-	/**
-	 * 构造函数
-	 * @param text Json文档内容
-	 */
-	JSONExtend(String text) {
-		this.text = text
-		this.jsonObject = JSONObject.fromObject(this.text)
-		analyzeJSONObject(this.jsonObject, '')
-	}
-
 	@NonCPS
 	JSONObject getJsonObject() {
 		return jsonObject

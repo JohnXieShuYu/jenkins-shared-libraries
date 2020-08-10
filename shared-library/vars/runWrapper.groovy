@@ -6,6 +6,9 @@ import com.bluersw.model.Command
 import com.bluersw.model.StepType
 import com.bluersw.model.Steps
 import groovy.transform.Field
+import hudson.model.Cause
+import hudson.model.Job
+import jenkins.model.Jenkins
 
 @Field LinkedList<StepFactory> factories
 @Field String[] jsonFilePaths
@@ -105,5 +108,34 @@ private static String[] getJSONFilePath(String projectPaths) {
 		}
 	}
 	return dirs
+}
+
+static LinkedHashMap<String, Object> getJenkinsVariable(def pipeline) {
+	LinkedHashMap<String, Object> jenkinsVariable = new LinkedHashMap<>()
+	jenkinsVariable.putAll(pipeline.params as LinkedHashMap<String, Object>)
+	try {
+		String BUILD_URL = pipeline.BUILD_URL == null ? '' : pipeline.BUILD_URL
+		String BUILD_ID = pipeline.BUILD_ID == null ? '' : pipeline.BUILD_ID
+		String JOB_NAME = pipeline.JOB_NAME == null ? '' : pipeline.JOB_NAME
+		String CHANGE_TITLE = runStdoutScript('git --no-pager show -s --format="%s" -n 1')
+		def USER_ID = "0"
+		def jenkins = Jenkins.getInstanceOrNull()
+		if (jenkins != null) {
+			def job = jenkins.getItemByFullName(JOB_NAME.toString(), Job.class)
+			def build = job.getBuildByNumber(BUILD_ID as int)
+			Cause.UserIdCause cause = build.getCause(Cause.UserIdCause) as Cause.UserIdCause
+			if (cause != null) {
+				USER_ID = cause.getUserName()
+			}
+		}
+		jenkinsVariable.put('BUILD_URL',BUILD_URL)
+		jenkinsVariable.put('BUILD_ID',BUILD_ID)
+		jenkinsVariable.put('JOB_NAME',JOB_NAME)
+		jenkinsVariable.put('CHANGE_TITLE',CHANGE_TITLE)
+		jenkinsVariable.put('USER_ID',USER_ID)
+	}
+	catch (ignored){}
+	println(jenkinsVariable)
+	return jenkinsVariable
 }
 
