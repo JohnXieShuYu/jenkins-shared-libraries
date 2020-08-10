@@ -64,13 +64,13 @@ private void runCommand(Step step) {
 		if (step.stepType == StepType.COMMAND_STDOUT) {
 			result = runStdoutScript(cmd.command)
 			String success = step.getStepPropertyValue('Success-IndexOf')
-			if (success != '' && result != null && !result.toString().indexOf(success)) {
-				throw new Exception("[${cmd.command}]执行失败，返回[${result}]")
+			if (success != '' && result != null && result.toString().indexOf(success) == -1) {
+				throw new Exception("[${cmd.command}]执行失败，返回[${result}],没有找到成功标准[${success}]")
 			}
 			else {
 				String fail = step.getStepPropertyValue('Fail-IndexOf')
-				if (fail != '' && result != null && result.toString().indexOf(fail)) {
-					throw new Exception("[${cmd.command}]执行失败，返回[${result}]")
+				if (fail != '' && result != null && result.toString().indexOf(fail) != -1) {
+					throw new Exception("[${cmd.command}]执行失败，返回[${result}]，找到失败标准[${fail}]")
 				}
 			}
 		}
