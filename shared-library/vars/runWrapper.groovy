@@ -10,12 +10,15 @@ import groovy.transform.Field
 @Field LinkedList<StepFactory> factories
 @Field String[] jsonFilePaths
 
+//加载JSON配置文件合集
 void loadJSON(String projectPaths){
-	this.jsonFilePaths = getDirectories(projectPaths)
+	this.jsonFilePaths = getJSONFilePath(projectPaths)
 	this.factories = createStepFactory(this.jsonFilePaths)
 }
 
+//运行指定构建步骤集合
 void runJsonSteps(String stepsName) {
+	//CPS脚本不能使用for( ..in ..) 和 each() 只能用for(;;)
 	for (int factoryIndex = 0; factoryIndex < this.factories.size(); factoryIndex++) {
 		StepFactory factory = this.factories[factoryIndex]
 		println("开始执行[${factory.configPath}]的[${stepsName}]")
@@ -32,6 +35,7 @@ void runJsonSteps(String stepsName) {
 	}
 }
 
+//打印加载JSON配置文件时的日志
 void printLoadFactoryLog() {
 	for (StepFactory factory in this.factories) {
 		//打印装载配置文件日志
@@ -40,6 +44,7 @@ void printLoadFactoryLog() {
 	}
 }
 
+//执行构建步骤
 private void runJsonStep(Step step) {
 	switch (step.stepType) {
 	default:
@@ -50,6 +55,7 @@ private void runJsonStep(Step step) {
 	}
 }
 
+//执行构建步骤中的命令脚本
 private void runCommand(Step step) {
 	for (int i = 0; i < step.commandQueue.size(); i++) {
 		Command cmd = step.commandQueue[i]
@@ -65,6 +71,7 @@ private void runCommand(Step step) {
 	}
 }
 
+//创建JSON文件对应的StepFactory对象
 private static LinkedList<StepFactory> createStepFactory(String[] jsonFile) {
 	LinkedList<StepFactory> factoryList = new LinkedList<>()
 	for (String json in jsonFile) {
@@ -75,19 +82,15 @@ private static LinkedList<StepFactory> createStepFactory(String[] jsonFile) {
 	return factoryList
 }
 
-private static String[] getDirectories(String projectPaths) {
-	String[] paths = projectPaths.split(',')
-	//设置构建配置文件
-	configJSONFilePath(paths)
-	return paths
-}
-
-private static void configJSONFilePath(String[] dirs) {
+//根据路径合集获得JSON配置文件的路径集合
+private static String[] getJSONFilePath(String projectPaths) {
+	String[] dirs = projectPaths.split(',')
 	for (int i = 0; i < dirs.length; i++) {
 		if (!dirs[i].endsWith('.json')) {
 			//默认项目根目录或子项目目录下jenkins-project.json作为构建配置文件
 			dirs[i] = dirs[i] + 'jenkins-project.json'
 		}
 	}
+	return dirs
 }
 
