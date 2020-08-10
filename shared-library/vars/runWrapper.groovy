@@ -5,6 +5,7 @@ import com.bluersw.model.Step
 import com.bluersw.model.Command
 import com.bluersw.model.StepType
 import com.bluersw.model.Steps
+import com.cloudbees.groovy.cps.NonCPS
 import groovy.transform.Field
 import hudson.model.Cause
 import hudson.model.Job
@@ -110,32 +111,25 @@ private static String[] getJSONFilePath(String projectPaths) {
 	return dirs
 }
 
+@NonCPS
 static LinkedHashMap<String, Object> getJenkinsVariable(def pipeline) {
 	LinkedHashMap<String, Object> jenkinsVariable = new LinkedHashMap<>()
-	jenkinsVariable.putAll(pipeline.params as LinkedHashMap<String, Object>)
 	try {
+		jenkinsVariable.putAll(pipeline.params as LinkedHashMap<String, Object>)
 		String BUILD_URL = pipeline.BUILD_URL == null ? '' : pipeline.BUILD_URL
 		String BUILD_ID = pipeline.BUILD_ID == null ? '' : pipeline.BUILD_ID
 		String JOB_NAME = pipeline.JOB_NAME == null ? '' : pipeline.JOB_NAME
+		//需要安装user build vars plugin 插件
+		String BUILD_USER = pipeline.BUILD_USER == null ? '' : pipeline.BUILD_USER
 		String CHANGE_TITLE = runStdoutScript('git --no-pager show -s --format="%s" -n 1')
-		def USER_NAME = "Undefined"
-		def jenkins = Jenkins.getInstanceOrNull()
-		if (jenkins != null) {
-			def job = jenkins.getItemByFullName(JOB_NAME.toString(), Job.class)
-			def build = job.getBuildByNumber(BUILD_ID as int)
-			Cause.UserIdCause cause = build.getCause(Cause.UserIdCause) as Cause.UserIdCause
-			if (cause != null) {
-				USER_NAME = cause.getUserName()
-			}
-		}
 		jenkinsVariable.put('BUILD_URL',BUILD_URL)
 		jenkinsVariable.put('BUILD_ID',BUILD_ID)
 		jenkinsVariable.put('JOB_NAME',JOB_NAME)
 		jenkinsVariable.put('CHANGE_TITLE',CHANGE_TITLE)
-		jenkinsVariable.put('USER_ID',USER_NAME)
+		jenkinsVariable.put('BUILD_USER',BUILD_USER)
 	}
 	catch (ignored){}
-	println(jenkinsVariable)
+	jenkinsVariable.each {println("${it.key}:${it.value}")}
 	return jenkinsVariable
 }
 
