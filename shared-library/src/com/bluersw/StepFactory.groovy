@@ -139,6 +139,22 @@ class StepFactory {
 	}
 
 	/**
+	 * 完善SonarQube检查时的构建步骤
+	 * @param step SonarQube构建步骤对象
+	 */
+	private static void perfectSqCheckStep(Step step) {
+		if(step.getStepProperty('SonarScannerScript') == null){
+			step.setStepProperty('SonarScannerScript', 'mvn clean;sonar-scanner')
+		}
+		if(step.getStepProperty('SonarScannerReportTaskPath') == null) {
+			step.setStepProperty('SonarScannerReportTaskPath', '.scannerwork/report-task.txt')
+		}
+		if(step.getStepProperty('QualityGate') == null) {
+			step.setStepProperty('QualityGate', 'OK')
+		}
+	}
+
+	/**
 	 * 使用默认方法创建构建步骤对象
 	 * @param stepName 构建步骤对象
 	 * @param stepType 构建步骤类型
@@ -186,9 +202,13 @@ class StepFactory {
 				switch (step.stepType) {
 				case (StepType.COMMAND_STATUS_FOR):
 					perfectCommandForStep(step)
+					break 
+				case (StepType.SONAR_QUBE):
+                     perfectSqCheckStep(step)
 					break
 				default:
 					break
+
 				}
 			}
 		}

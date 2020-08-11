@@ -78,6 +78,9 @@ private void runCommand(Step step) {
 				}
 			}
 		}
+		else if (step.stepType == StepType.SONAR_QUBE) {
+			 runSqCheckScript(step)
+		}
 		else {
 			result = runStatusScript(cmd.command)
 			if (result != null && result != 0) {
