@@ -5,19 +5,17 @@ import com.bluersw.model.Step
 import com.bluersw.model.Command
 import com.bluersw.model.StepType
 import com.bluersw.model.Steps
-import com.cloudbees.groovy.cps.NonCPS
 import groovy.transform.Field
-import hudson.model.Cause
-import hudson.model.Job
-import jenkins.model.Jenkins
 
 @Field LinkedList<StepFactory> factories
 @Field String[] jsonFilePaths
+@Field Map<String,String> envVars
 
 //加载JSON配置文件合集
 void loadJSON(String projectPaths){
 	this.jsonFilePaths = getJSONFilePath(projectPaths)
 	this.factories = createStepFactory(this.jsonFilePaths)
+	this.envVars = jenkinsVariable.getEnvironment()
 }
 
 //运行指定构建步骤集合
@@ -46,6 +44,8 @@ void printLoadFactoryLog() {
 		LogType logLevel = factory.getLogLevel()
 		println(LogContainer.getLogByTag(factory.getInitStartTag(), factory.getInitEndTag(), logLevel))
 	}
+	println('Jenkins变量集合：')
+	println(this.envVars)
 }
 
 //执行构建步骤
@@ -111,25 +111,4 @@ private static String[] getJSONFilePath(String projectPaths) {
 	return dirs
 }
 
-@NonCPS
-static LinkedHashMap<String, Object> getJenkinsVariable(def pipeline) {
-	LinkedHashMap<String, Object> jenkinsVariable = new LinkedHashMap<>()
-	try {
-		jenkinsVariable.putAll(pipeline.params as LinkedHashMap<String, Object>)
-		String BUILD_URL = pipeline.BUILD_URL == null ? '' : pipeline.BUILD_URL
-		String BUILD_ID = pipeline.BUILD_ID == null ? '' : pipeline.BUILD_ID
-		String JOB_NAME = pipeline.JOB_NAME == null ? '' : pipeline.JOB_NAME
-		//需要安装user build vars plugin 插件
-		String BUILD_USER = pipeline.BUILD_USER == null ? '' : pipeline.BUILD_USER
-		String CHANGE_TITLE = runStdoutScript('git --no-pager show -s --format="%s" -n 1')
-		jenkinsVariable.put('BUILD_URL',BUILD_URL)
-		jenkinsVariable.put('BUILD_ID',BUILD_ID)
-		jenkinsVariable.put('JOB_NAME',JOB_NAME)
-		jenkinsVariable.put('CHANGE_TITLE',CHANGE_TITLE)
-		jenkinsVariable.put('BUILD_USER',BUILD_USER)
-	}
-	catch (ignored){}
-	jenkinsVariable.each {println("${it.key}:${it.value}")}
-	return jenkinsVariable
-}
 
