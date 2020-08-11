@@ -1,4 +1,3 @@
-import com.bluersw.StepFactory
 import com.bluersw.model.LogContainer
 import com.bluersw.model.LogType
 import com.bluersw.model.Step
@@ -7,9 +6,6 @@ import com.bluersw.model.StepType
 import com.bluersw.model.Steps
 import com.cloudbees.groovy.cps.NonCPS
 import groovy.transform.Field
-import hudson.model.Cause
-import hudson.model.Job
-import jenkins.model.Jenkins
 
 @Field LinkedList<StepFactory> factories
 @Field String[] jsonFilePaths

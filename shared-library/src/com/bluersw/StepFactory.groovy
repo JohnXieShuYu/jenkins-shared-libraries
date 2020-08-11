@@ -204,7 +204,7 @@ class StepFactory {
 					perfectCommandForStep(step)
 					break 
 				case (StepType.SONAR_QUBE):
-                     perfectSqCheckStep(step)
+					perfectSqCheckStep(step)
 					break
 				default:
 					break
