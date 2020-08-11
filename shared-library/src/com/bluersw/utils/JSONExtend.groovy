@@ -9,6 +9,7 @@ import com.cloudbees.groovy.cps.NonCPS
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel
 import hudson.remoting.Channel
+import net.sf.json.JSONNull
 import net.sf.json.JSONObject
 
 /**
@@ -28,19 +29,24 @@ class JSONExtend {
 	private JSONObject jsonObject
 	private LinkedHashMap<String, String> globalVariable = new LinkedHashMap<>()
 	private LinkedHashMap<String, LinkedHashMap<String, String>> localVariable = new LinkedHashMap<>()
+	private Map<String, String> envVars
 
 
 	/**
 	 * 构造函数
 	 * @param channel 运行构建脚本的服务器环境，如果为null就代表当前环境
 	 * @param path 文件路径
+	 * @param envVars Jenkins构建环境变量
 	 */
-	JSONExtend(VirtualChannel channel, String path) {
+	JSONExtend(VirtualChannel channel, String path, Map<String, String> envVars) {
 		this.channel = channel == null ? Channel.current() : channel
+		this.envVars = envVars == null ? new LinkedHashMap<String, String>() : envVars
 		this.path = path.replace("/", FILE_SEPARATOR).replace("\\", FILE_SEPARATOR)
 		this.filePath = new FilePath(channel, path)
 		this.text = filePath.readToString()
 		this.jsonObject = JSONObject.fromObject(this.text)
+		setEnvVarsForJSONObject(this.jsonObject, this.envVars)
+		setEnvVarsForGlobalVariable(this.globalVariable, this.envVars)
 		analyzeJSONObject(this.jsonObject, '')
 	}
 
@@ -57,6 +63,32 @@ class JSONExtend {
 	@NonCPS
 	LinkedHashMap<String, LinkedHashMap<String, String>> getLocalVariable() {
 		return localVariable
+	}
+
+	/**
+	 * 为Json文件对象设置环境变量
+	 * @param jsonObject Json文件对象
+	 * @param envVars 环境变量
+	 */
+	@NonCPS
+	private static void setEnvVarsForJSONObject(JSONObject jsonObject, Map<String, String> envVars) {
+		JSONObject gv = null
+		if (!jsonObject.containsKey(NODE_NAME_GLOBAL_VARIABLE)) {
+			jsonObject.accumulate(NODE_NAME_GLOBAL_VARIABLE, new JSONObject())
+		}
+
+		gv = jsonObject[NODE_NAME_GLOBAL_VARIABLE] as JSONObject
+		envVars.each { if (it.value != null) (gv.accumulate(it.key, it.value)) }
+	}
+
+	/**
+	 * 为全局变量集合设置环境变量（因为有的Json文件没有NODE_NAME_GLOBAL_VARIABLE节点）
+	 * @param globalVariable 全局变量集合
+	 * @param envVars 环境变量
+	 */
+	@NonCPS
+	private static void setEnvVarsForGlobalVariable(LinkedHashMap<String, String> globalVariable, Map<String, String> envVars) {
+		envVars.each { if (it.value != null) { globalVariable.put(it.key, it.value) } }
 	}
 
 	/**
@@ -137,7 +169,7 @@ class JSONExtend {
 	 * @return 作用域层次集合（由近及远）
 	 */
 	@NonCPS
-	private static List<String> splitScopeLevel(String xpath){
+	private static List<String> splitScopeLevel(String xpath) {
 		//分解作用域层次
 		String scope = xpath
 		List<String> scopeList = new ArrayList<>()
@@ -155,8 +187,8 @@ class JSONExtend {
 	 * @return 节点值如果含变量引用，将变量赋值后返回
 	 */
 	@NonCPS
-	private String transformNodeValue(String xpath, String nodeValue){
-		if(JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()){
+	private String transformNodeValue(String xpath, String nodeValue) {
+		if (JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()) {
 			//分解作用域层次
 			List<String> scopeList = splitScopeLevel(xpath)
 			//对引用的变量名称进行分组匹配
@@ -166,7 +198,7 @@ class JSONExtend {
 				//循环作用域尝试为变量赋值
 				for (String scopeKey in scopeList) {
 					if (localVariable.containsKey(scopeKey)) {
-						if(localVariable[scopeKey].containsKey(key)){
+						if (localVariable[scopeKey].containsKey(key)) {
 							nodeValue = nodeValue.replace("\${${key}}", localVariable[scopeKey][key])
 						}
 						//判断是否存在需要赋值的变量，如果没有就跳出循环，加快运行速度
@@ -177,7 +209,7 @@ class JSONExtend {
 				}
 				//遍历全局变量尝试赋值
 				if (JUDGE_VARIABLE_PATTERN.matcher(nodeValue).find()) {
-					if(globalVariable.containsKey(key))
+					if (globalVariable.containsKey(key))
 						nodeValue = nodeValue.replace("\${${key}}", globalVariable[key])
 				}
 			}
@@ -211,10 +243,10 @@ class JSONExtend {
 					setLocalVariable(xpath, entry.key.toString(), entry.value.toString())
 				}
 				//如果节点的值含变量引用，赋值后返回新的节点值内容
-				entry.value = transformNodeValue(xpath,entry.value.toString())
+				entry.value = transformNodeValue(xpath, entry.value.toString())
 
 				//添加日志
-				LogContainer.append(LogType.DEBUG,"${xpath} - ${entry.value.toString()}")
+				LogContainer.append(LogType.DEBUG, "${xpath} - ${entry.value.toString()}")
 			}
 			else {
 				entrys = entry.value.iterator()

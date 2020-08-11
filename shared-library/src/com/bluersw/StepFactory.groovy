@@ -23,18 +23,21 @@ class StepFactory {
 	static final String COMMAND_SCRIPT_NODE_NAME = 'Script'
 	static final String GLOBAL_LOG_LEVEL_NODE_NAME = 'LogLevel'
 	static final String INIT_LOG_END_TAG = '初始化完成----------'
+	private Map<String, String> envVars
 
 	/**
 	 * 构造函数
 	 * @param configPath 构建配置文件路径
-	 * @param utility Jenkins环境函数或方法实现
+	 * @param envVars Jenkins环境变量
 	 */
-	StepFactory(String configPath) {
+	StepFactory(String configPath, Map<String, String> envVars) {
 		this.configPath = configPath
+		this.envVars = envVars == null ? new LinkedHashMap<String, String>() : envVars
 		//加载配置文件
-		this.json = new JSONExtend(Channel.current(), configPath)
+		this.json = new JSONExtend(Channel.current(), configPath, envVars)
 		//获取经过变量赋值的配置文件JSON对象
 		this.jsonObject = this.json.getJsonObject()
+
 	}
 
 	/**
@@ -76,11 +79,11 @@ class StepFactory {
 		return builder.toString()
 	}
 
-	String getInitStartTag(){
+	String getInitStartTag() {
 		return this.configPath
 	}
 
-	static String getInitEndTag(){
+	static String getInitEndTag() {
 		return INIT_LOG_END_TAG
 	}
 
@@ -102,10 +105,11 @@ class StepFactory {
 		LogContainer.append(LogType.INFO, getInitEndTag())
 	}
 
-	Steps getStepsByName(String stepsName){
-		if(this.stepsMap.containsKey(stepsName)) {
+	Steps getStepsByName(String stepsName) {
+		if (this.stepsMap.containsKey(stepsName)) {
 			return this.stepsMap[stepsName]
-		}else{
+		}
+		else {
 			return null
 		}
 	}
