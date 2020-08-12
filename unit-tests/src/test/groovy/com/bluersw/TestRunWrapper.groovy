@@ -20,6 +20,7 @@ class TestRunWrapper extends DeclarativePipelineTest{
 	@Before
 	void setUp() throws Exception {
 		scriptRoots += 'src/main/jenkins'
+		//scriptRoots += ''
 		super.setUp()
 		binding.setVariable('scm', [branch: 'master'])
 		helper.registerAllowedMethod('isUnix',[],{true})
@@ -37,7 +38,9 @@ class TestRunWrapper extends DeclarativePipelineTest{
 							   .retriever(localSource(sharedLibs))
 							   .build()
 		helper.registerSharedLibrary(library)
-		runScript('com/bluersw/testRunWrapper.Jenkinsfile')
+		runScript('/com/bluersw/testRunWrapper.Jenkinsfile')
+		//runScript('testRunWrapper.Jenkinsfile')
+
 		assertJobStatusSuccess()
 	}
 }

@@ -147,13 +147,16 @@ class StepFactory {
 	 * @param step SonarQube构建步骤对象
 	 */
 	private static void perfectSqCheckStep(Step step) {
-		if(step.getStepProperty('SonarScannerScript') == null){
+		if(step.getStepProperty('SonarScannerScript').equals("")){
+			//在sonar-scanner之前进行mvn clean的目的在于过滤掉一些不必要检查的文件
 			step.setStepProperty('SonarScannerScript', 'mvn clean;sonar-scanner')
 		}
-		if(step.getStepProperty('SonarScannerReportTaskPath') == null) {
+		if(step.getStepProperty('SonarScannerReportTaskPath').equals("")) {
+			//这是SQ检查之后生成的本地报告的路径及文件
 			step.setStepProperty('SonarScannerReportTaskPath', '.scannerwork/report-task.txt')
 		}
-		if(step.getStepProperty('QualityGate') == null) {
+		if(step.getStepProperty('QualityGate').equals("")) {
+			//这是判断SQ检查是否通过的标准，也是设置的阀门值，OK为最高，下面依次为WARN,、ERROR、NONE
 			step.setStepProperty('QualityGate', 'OK')
 		}
 	}

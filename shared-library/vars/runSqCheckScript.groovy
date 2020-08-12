@@ -1,6 +1,5 @@
 import com.bluersw.model.Step
 import com.bluersw.utils.HttpRequest
-import com.bluersw.utils.GResult
 
 /**
  * 执行SonarQube代码扫描
@@ -24,7 +23,7 @@ def call(Step step){
  * @param step代码扫描阶段节点
  * @return 扫描代码质量是否合格
  */
-GResult getSonarQubeQualityGate(Step step){
+String getSonarQubeQualityGate(Step step){
 	def reportTask = readProperties(file:step.getStepPropertyValue('SonarScannerReportTaskPath'))
 
 	if(reportTask == null)
@@ -51,9 +50,9 @@ GResult getSonarQubeQualityGate(Step step){
 	println(qualitygate)
 
 	if(contrastQualityGate(qualitygate["projectStatus"]["status"],step.getStepPropertyValue('QualityGate')))
-		return new GResult(true,"SonarQube质量检查通过，${dashboardUrl}")
+		return  "SonarQube质量检查通过，${dashboardUrl}"
 	else
-		return new GResult(false,"SonarQube质量检查未通过，浏览地址：${dashboardUrl}")
+		return "SonarQube质量检查未通过，浏览地址：${dashboardUrl}"
 }
 
 /**
