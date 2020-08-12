@@ -11,10 +11,10 @@ import groovy.transform.Field
 @Field Map<String,String> envVars
 
 //加载JSON配置文件合集
-void loadJSON(String projectPaths){
-	this.jsonFilePaths = getJSONFilePath(projectPaths)
-	this.factories = createStepFactory(this.jsonFilePaths)
+void loadJSON(String projectPaths) {
 	this.envVars = jenkinsVariable.getEnvironment()
+	this.jsonFilePaths = getJSONFilePath(projectPaths)
+	this.factories = createStepFactory(this.jsonFilePaths, this.envVars)
 }
 
 //运行指定构建步骤集合
@@ -43,8 +43,6 @@ void printLoadFactoryLog() {
 		LogType logLevel = factory.getLogLevel()
 		println(LogContainer.getLogByTag(factory.getInitStartTag(), factory.getInitEndTag(), logLevel))
 	}
-	println('Jenkins变量集合：')
-	println(this.envVars)
 }
 
 //执行构建步骤
@@ -91,10 +89,10 @@ private void runCommand(Step step) {
 }
 
 //创建JSON文件对应的StepFactory对象
-private static LinkedList<StepFactory> createStepFactory(String[] jsonFile) {
+private static LinkedList<StepFactory> createStepFactory(String[] jsonFile, Map<String,String> envVars) {
 	LinkedList<StepFactory> factoryList = new LinkedList<>()
 	for (String json in jsonFile) {
-		StepFactory factory = new StepFactory(json)
+		StepFactory factory = new StepFactory(json, envVars)
 		factory.initialize()
 		factoryList.add(factory)
 	}

@@ -2,6 +2,7 @@ import com.cloudbees.groovy.cps.NonCPS
 import hudson.EnvVars
 import org.jenkinsci.plugins.workflow.cps.EnvActionImpl
 
+//打印构建过程中的环境变量
 @NonCPS
 void printVars() {
 	//env 是 org.jenkinsci.plugins.workflow.cps.EnvActionImpl类型
@@ -21,6 +22,7 @@ void printVars() {
 	println(SCM_CHANGE_TITLE)
 }
 
+//获得构建过程中的环境变量含构建参数变量
 Map<String,String> getEnvironment() {
 	Map<String, String> envMap = new LinkedHashMap<>()
 	if (env != null && env instanceof EnvActionImpl) {
@@ -38,9 +40,11 @@ Map<String,String> getEnvironment() {
 		envMap.put("REAL_USER_NAME",REAL_USER_NAME)
 	}
 
-	String CM_CHANGE_TITLE = runStdoutScript("git --no-pager show -s --format=\"%s\" -n 1")
-
-	envMap.put("CM_CHANGE_TITLE",CM_CHANGE_TITLE)
+	String CSM_CHANGE_TITLE = runStdoutScript("git --no-pager show -s --format=\"%s\" -n 1")
+	if(CSM_CHANGE_TITLE != null){
+		CSM_CHANGE_TITLE = CSM_CHANGE_TITLE.trim()
+	}
+	envMap.put("CSM_CHANGE_TITLE",CSM_CHANGE_TITLE)
 
 	return envMap
 }
