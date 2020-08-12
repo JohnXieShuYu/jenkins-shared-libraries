@@ -215,7 +215,6 @@ class StepFactory {
 					break
 				default:
 					break
-
 				}
 			}
 		}
